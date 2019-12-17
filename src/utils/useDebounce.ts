@@ -7,7 +7,10 @@ export interface ReturnValue<T extends any[]> {
   cancel: () => void;
 }
 
-export default function useDebounce<T extends any[]>(fn: (...args: T) => any, wait: number): ReturnValue<T> {
+export default function useDebounce<T extends any[]>(
+  fn: (...args: T) => any,
+  wait: number,
+): ReturnValue<T> {
   const timer = useRef<any>();
 
   const fnRef = useRef<noop>(fn);
@@ -36,4 +39,3 @@ export default function useDebounce<T extends any[]>(fn: (...args: T) => any, wa
     cancel,
   };
 }
-

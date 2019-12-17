@@ -3,6 +3,17 @@ React Hooks for fetching, caching and updating asynchronous data
 
 ## Feature
 
+* 自动请求/手动请求
+* SWR(stale-while-revalidate)
+* 缓存/预加载
+* 屏幕聚焦重新请求
+* 轮询请求
+* 防抖
+* 节流
+* 分页
+* 并发
+* ......
+
 ## Install
 
 ```
@@ -37,7 +48,7 @@ function Todos() {
 
 ## Examples
 
-
+[![Edit](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/umijs/use-api/tree/master/examples)
 
 ## API
 
@@ -116,46 +127,47 @@ const {
 * `history` [类型](./src/types.ts#L23)
   * 默认情况下，新请求会覆盖旧请求。如果设置了 `fetchKey`，则可以实现多个请求并行，`history` 存储了多个请求的状态。参考 [例子]()
 
-* `pagination` [类型](./src/types.ts#87)
+* `pagination` [类型](./src/types.ts#L87)
   * 分页数据及操作分页的方法。在 `options.paginated = true` 时有效。
 
-* `tableProps` [类型](./src/types.ts#96)
+* `tableProps` [类型](./src/types.ts#L96)
   * 适配 [antd Table](https://ant.design/components/table-cn/) 组件的数据结构，可以直接用在 Table 组件上，见 [例子]()。
 
 * `sorter`
-  * antd Table sorter，见 [例子]()。
+  * antd Table sorter，见 [例子](./examples/src/pages/antdTable/index.tsx)。
 
 * `filters`
-  * antd Table filters，见 [例子]()。
+  * antd Table filters，见 [例子](./examples/src/pages/antdTable/index.tsx)。
 
 ### Options
 
 所有的 Options 均是可选的。
 
 * `refreshDeps: any[]` 
-  * 在 `manual = false` 时，`refreshDeps` 变化，会触发 useAPI 重新执行。参考 [例子]()
+  * 在 `manual = false` 时，`refreshDeps` 变化，会触发 useAPI 重新执行。参考 [例子](./examples/src/pages/refreshDeps/index.tsx)
   * 在 `paginated = true` 的分页场景下，`refreshDeps` 变化，会初始化当前分页 `current` 至第一页。
 
 * `manual: boolean`
-  * 默认 `false`。 即在初始化时自动执行 service，参考 [例子]()
-  * 如果设置为 `true`，则需要手动调用 `run` 触发执行，参考 [例子]()
+  * 默认 `false`。 即在初始化时自动执行 service，参考 [例子](./examples/src/pages/index.tsx)
+  * 如果设置为 `true`，则需要手动调用 `run` 触发执行，参考 [例子](./examples/src/pages/manual/index.tsx)
 
 * `onSuccess: (data:any, params: any[]) => void`
-  * service resolve 时触发，参数为 `data` 和 `params`, 参考 [例子]()
+  * service resolve 时触发，参数为 `data` 和 `params`, 参考 [例子](./examples/src/pages/manual/index.tsx)
 
 * `onError: (error: Error, params: any[]) => void`
   * service 报错时触发，参数为 `error` 和 `params`。
 
 * `fetchKey: (params: any[]) => string|number` 
-  * 根据 params，获取当前请求的 key，设置之后，我们会在 `history` 中同时维护不同 `key` 值的请求状态，参考 [例子](#)
+  * 根据 params，获取当前请求的 key，设置之后，我们会在 `history` 中同时维护不同 `key` 值的请求状态，参考 [例子](./examples/src/pages/fetchKey/index.tsx)
 
 * `cacheKey: string`
   * 请求唯一标识。如果设置了 `cacheKey`，我们会启用缓存机制。
   * 在缓存机制下，同样的请求我们会先返回缓存中的数据，同时会在背后发送新的请求，待新数据返回后，重新触发数据更新。
   * 缓存的的键值 `key` 为 `JSON.Stringify([cacheKey,...params,...refreshDeps])`
+  * 参考 [例子](./examples/src/pages/cacheKey/index.tsx)
   
 * `pollingInterval: number` 
-  * 轮询间隔，单位毫秒。设置后，将进入轮询模式，定时触发 `run`
+  * 轮询间隔，单位毫秒。设置后，将进入轮询模式，定时触发 `run`。参考 [例子](./examples/src/pages/polling/index.tsx)
 
 * `pollingWhenHidden: boolean`
   * 在页面隐藏时，是否继续轮询。默认为 `true`，即不会停止轮询。
@@ -164,6 +176,7 @@ const {
 * `refreshOnWindowFocus: boolean` 
   * 在屏幕重新获取焦点时，是否重新发起请求。默认为 `false`，即不会重新发起请求。
   * 如果设置为 `true`，在屏幕重新聚焦时，会重新发起请求。
+  * 参考 [例子](./examples/src/pages/refreshOnWindowFocus/index.tsx)
 
 * `focusTimespan: number`
   * 屏幕重新聚焦，如果每次都重新发起请求，不是很好，我们需要有一个时间间隔，在当前时间间隔内，不会重新发起请求。默认为 `5000ms`
@@ -201,6 +214,6 @@ const {
 * [ ] loadingDelay
 * [ ] mutate 接收函数
 
-## ✅ License
+## License
 
 [MIT](https://github.com/umijs/umi/blob/master/LICENSE)
