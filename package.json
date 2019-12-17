@@ -1,0 +1,40 @@
+{
+  "name": "@umijs/use-api",
+  "version": "0.1.0",
+  "description": "React Hooks for fetching, caching and updating asynchronous data",
+  "main": "./lib/index.js",
+  "module": "./es/index.js",
+  "types": "./lib/index.d.ts",
+  "scripts": {
+    "build": "father build && tsc --declarationDir ./lib && tsc --declarationDir ./es",
+    "test": "father test",
+    "precommit": "father pre-commit"
+  },
+  "files": [
+    "dist",
+    "lib",
+    "es",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umijs/use-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/umijs/use-api/issues"
+  },
+  "homepage": "https://github.com/umijs/use-api#readme",
+  "peerDependencies": {
+    "react": "^16.8.6"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "antd": "^3.20.1",
+    "father": "^2.29.1",
+    "react": "^16.12.0"
+  }
+}

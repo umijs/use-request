@@ -1,0 +1,15 @@
+.layout {
+  display: flex;
+  height: 100%;
+}
+
+.left {
+  flex: 0 0 220px;
+  border-right: 1px solid #bbbbbb;
+  padding: 24px;
+}
+
+.right {
+  flex: 1 1;
+  padding: 24px;
+}

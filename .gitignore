@@ -1,0 +1,11 @@
+/yarn.lock
+/package-lock.json
+/dist/
+/es/
+/lib/
+/node_modules
+/.history
+/.idea
+/coverage
+.doc
+.DS_Store
