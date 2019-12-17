@@ -125,13 +125,13 @@ const {
   * 直接修改 data，见 [例子]()
 
 * `history` [类型](./src/types.ts#L23)
-  * 默认情况下，新请求会覆盖旧请求。如果设置了 `fetchKey`，则可以实现多个请求并行，`history` 存储了多个请求的状态。参考 [例子]()
+  * 默认情况下，新请求会覆盖旧请求。如果设置了 `fetchKey`，则可以实现多个请求并行，`history` 存储了多个请求的状态。参考 [例子](./examples/src/pages/fetchKey/index.tsx)
 
 * `pagination` [类型](./src/types.ts#L87)
   * 分页数据及操作分页的方法。在 `options.paginated = true` 时有效。
 
 * `tableProps` [类型](./src/types.ts#L96)
-  * 适配 [antd Table](https://ant.design/components/table-cn/) 组件的数据结构，可以直接用在 Table 组件上，见 [例子]()。
+  * 适配 [antd Table](https://ant.design/components/table-cn/) 组件的数据结构，可以直接用在 Table 组件上，见 [例子](./examples/src/pages/antdTable/index.tsx)。
 
 * `sorter`
   * antd Table sorter，见 [例子](./examples/src/pages/antdTable/index.tsx)。
