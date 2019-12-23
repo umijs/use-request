@@ -38,6 +38,8 @@ export type BaseOptions<R, P extends any[]> = {
   onSuccess?: (data: R, params: P) => void; // 成功回调
   onError?: (e: Error, params: P) => void; // 失败回调
 
+  loadingDelay?: number; // loading delay
+
   defaultParams?: P;
   // 轮询
   pollingInterval?: number; // 轮询的间隔毫秒

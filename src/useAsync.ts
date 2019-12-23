@@ -51,6 +51,9 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
     manual = false,
     onSuccess,
     onError,
+
+    loadingDelay,
+
     pollingInterval = 0,
     pollingWhenHidden = true,
 
@@ -71,6 +74,9 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
 
   // 轮询定时器
   const timerRef = useRef<any>();
+
+  // loading delay 定时器，每个不同的 runkey 有自己的定时器
+  const loadingDelayTimerRef = useRef<{ [key: string]: any }>({});
 
   // 防止调用函数时，产生 capture value 问题
   const serviceRef = useRef(service);
@@ -157,6 +163,14 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
     });
   }, []);
 
+  const clearLoadingDelayTimer = useCallback((runKey: any) => {
+    // 清除上一个 runKey 的 loadingDelayTimer
+    if (loadingDelayTimerRef.current[runKey]) {
+      clearTimeout(loadingDelayTimerRef.current[runKey]);
+      loadingDelayTimerRef.current[runKey] = null;
+    }
+  }, []);
+
   const run = useCallback((...args: P) => {
     // 取消已有定时器
     if (timerRef.current) {
@@ -173,6 +187,8 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
     }
     // 闭包存储当前请求 分类 key
     const runKey = newstKey.current;
+
+    clearLoadingDelayTimer(runKey);
 
     // 记录该 runKey 下最新的 count，同一个 runKey，老的 count 均需要废弃
     runKeyCount.current[runKey] = runCount;
@@ -191,7 +207,7 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
       s[runKey] = {
         data: cacheData || s[runKey]?.data || undefined,
         error: s[runKey]?.error || undefined,
-        loading: true,
+        loading: loadingDelay ? false : true,
         params: args,
         cancel: () => {
           cancelProxyRef.current(runKey);
@@ -203,14 +219,25 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
       return { ...s }
     });
 
+    // loading delay
+    if (loadingDelay) {
+      loadingDelayTimerRef.current[runKey] = setTimeout(() => {
+        setHistory((s: any) => {
+          s[runKey].loading = true;
+          return { ...s }
+        });
+      }, loadingDelay);
+    }
+
+
     return serviceRef.current(...args).then(res => {
       // 同一个 runKey，只有最新的 count 才会响应 
       if (!unmountFlag.current && runCount === runKeyCount.current[runKey]) {
+        clearLoadingDelayTimer(runKey);
 
         if (cacheGroupKey) {
           setCache(cacheGroupKey, res);
         }
-
         const formattedResult = formatResultRef.current ? formatResultRef.current(res) : res;
         setHistory((s: any) => {
           s[runKey] = {
@@ -228,6 +255,7 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
       }
     }).catch(error => {
       if (!unmountFlag.current && runCount === runKeyCount.current[runKey]) {
+        clearLoadingDelayTimer(runKey);
         setHistory((s: any) => {
           s[runKey] = {
             ...(s[runKey] || {}),
@@ -255,7 +283,7 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
         }, pollingInterval);
       }
     });
-  }, [pollingInterval, pollingWhenHidden, getCacheGroupKey]);
+  }, [pollingInterval, pollingWhenHidden, getCacheGroupKey, clearLoadingDelayTimer]);
 
   const runDebounce = useDebounce(run, debounceInterval);
   const runThrottle = useThrottle(run, throttleInterval);
@@ -355,6 +383,11 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
+      Object.values(loadingDelayTimerRef.current).forEach((i: any) => {
+        if (i) {
+          clearTimeout(i);
+        }
+      })
       unmountFlag.current = true;
     };
   }, []);

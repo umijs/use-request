@@ -4,8 +4,6 @@ import Link from 'umi/link';
 
 const BasicLayout: React.FC = (props) => {
 
-  console.log(props);
-
   const routes = [{
     name: '默认用法',
     path: '/'
@@ -45,6 +43,9 @@ const BasicLayout: React.FC = (props) => {
   }, {
     name: '并发请求',
     path: '/fetchKey'
+  }, {
+    name: 'loadingDelay',
+    path: '/loadingDelay'
   }];
 
   return (

@@ -76,6 +76,7 @@ const {
   onError,
   formatResult,
   cacheKey,
+  loadingDelay,
 
   pollingInterval,
   pollingWhenHidden,
@@ -165,7 +166,10 @@ const {
   * 在缓存机制下，同样的请求我们会先返回缓存中的数据，同时会在背后发送新的请求，待新数据返回后，重新触发数据更新。
   * 缓存的的键值 `key` 为 `JSON.Stringify([cacheKey,...params,...refreshDeps])`
   * 参考 [例子](./examples/src/pages/cacheKey/index.tsx)
-  
+
+* `loadingDelay: number`
+  * 设置显示 loading 的延迟时间，避免闪烁。参考 [例子](./examples/src/pages/loadingDelay/index.tsx)
+
 * `pollingInterval: number` 
   * 轮询间隔，单位毫秒。设置后，将进入轮询模式，定时触发 `run`。参考 [例子](./examples/src/pages/polling/index.tsx)
 
@@ -211,7 +215,6 @@ const {
 * [ ] onLoadingSlow: 超时触发
 * [ ] suspense
 * [ ] initialData: 初始化 data
-* [ ] loadingDelay
 * [ ] mutate 接收函数
 
 ## License
