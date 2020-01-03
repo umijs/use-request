@@ -22,6 +22,10 @@ Production-ready React Hooks library for manage asynchronous data.
 - [ ] suspense
 - ......
 
+## 在线体验
+
+[![Edit](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/umijsuse-apiexamples-9qlcf)
+
 ## 快速开始
 
 ### 安装
@@ -76,13 +80,13 @@ export default () => {
 
 #### 默认请求
 
-[在线演示](./examples/src/pages/index.tsx)
+[代码示例](./examples/src/pages/index.tsx)
 
 如 [快速开始](#使用) 例子一样， useAPI 在组件初始化时会默认执行 service。
 
 #### 手动触发
 
-[在线演示](./examples/src/pages/manual/index.tsx)
+[代码示例](./examples/src/pages/manual/index.tsx)
 
 通过设置 `options.manual = true` , 则需要手动调用 `run` 时才会触发执行。
 
@@ -98,7 +102,7 @@ const { loading, run } = useAPI(changeUsername, {
 
 #### 突变
 
-[在线演示](./examples/src/pages/mutate/index.tsx)
+[代码示例](./examples/src/pages/mutate/index.tsx)
 
 你可以通过 `mutate` ，直接修改 `data` 。 `mutate` 函数参数可以为 `newData` 或 `(data)=> newData` 。
 
@@ -112,7 +116,7 @@ const { data, mutate } = useAPI(getUserInfo);
 
 #### 轮询
 
-[在线演示](./examples/src/pages/polling/index.tsx)
+[代码示例](./examples/src/pages/polling/index.tsx)
 
 通过设置 `pollingInterval` ，进入轮询模式，定时触发函数执行。同时可以通过设置 `pollingWhenHidden = false` ，在屏幕不可见时，暂时暂停定时任务。
 
@@ -128,7 +132,7 @@ const { data, loading } = useAPI(getUserInfo, {
 
 #### 防抖
 
-[在线演示](./examples/src/pages/debounce/index.tsx)
+[代码示例](./examples/src/pages/debounce/index.tsx)
 
 通过设置 `debounceInterval` ，则进入防抖模式。此时如果频繁触发 `run` ，则会以防抖策略进行请求。
 
@@ -140,7 +144,7 @@ const { data, loading, run } = useAPI(getUserInfo, {
 
 #### 节流
 
-[在线演示](./examples/src/pages/throttle/index.tsx)
+[代码示例](./examples/src/pages/throttle/index.tsx)
 
 通过设置 `throttleInterval` ，则进入节流模式。此时如果频繁触发 `run` ，则会以节流策略进行请求。
 
@@ -152,7 +156,7 @@ const { data, loading, run } = useAPI(getUserInfo, {
 
 #### 缓存 & SWR
 
-[在线演示](./examples/src/pages/cache/index.tsx)
+[代码示例](./examples/src/pages/cache/index.tsx)
 
 如果设置了 `cacheKey` ， useAPI 会将当前请求结束数据缓存起来。下次组件初始化时，如果有缓存数据，我们会优先返回缓存数据，然后在背后发送新请求，也就是 SWR 的能力。
 
@@ -167,13 +171,13 @@ const { data, loading, run } = useAPI(getInfo, {
 
 #### 预加载
 
-[在线演示](./examples/src/pages/preload/index.tsx)
+[代码示例](./examples/src/pages/preload/index.tsx)
 
 同一个 `cacheKey` 的请求，是全局共享的，也就是你可以提前加载数据。利用该特性，可以很方便的实现预加载。你可以在线上例子中体验一下。
 
 #### 屏幕聚焦重新请求
 
-[在线演示](./examples/src/pages/refreshOnWindowFocus/index.tsx)
+[代码示例](./examples/src/pages/refreshOnWindowFocus/index.tsx)
 
 如果你设置了 `refreshOnWindowFocus = true` ，则在浏览器窗口 `refouc` 和 `revisible` 时，会重新发起请求。
 
@@ -188,8 +192,8 @@ const { data, loading } = useAPI(getUserInfo, {
 
 #### 并行请求
 
-[在线演示1](./examples/src/pages/fetchKey/index.tsx)
-[在线演示2](./examples/src/pages/fetchKey2/index.tsx)
+[代码示例1](./examples/src/pages/fetchKey/index.tsx)
+[代码示例2](./examples/src/pages/fetchKey2/index.tsx)
 
 通过 `fetchKey` ，可以将请求进行分类，每一类的请求都有独立的状态，你可以在 `fetches` 中找到所有的请求。
 
@@ -207,7 +211,7 @@ const { run, fetches } = useAPI(disableUser, {
 
 #### Loading Delay
 
-[在线演示](./examples/src/pages/loadingDelay/index.tsx)
+[代码示例](./examples/src/pages/loadingDelay/index.tsx)
 
 通过设置 `loadingDelay` ，可以延迟 `loading` 变成 `true` 的时间，有效防止请求抖动。
 
@@ -221,7 +225,7 @@ const withLoadingDelayAction = useAPI(getCurrentTime, {
 
 #### refreshDeps
 
-[在线演示](./examples/src/pages/refreshDeps/index.tsx)
+[代码示例](./examples/src/pages/refreshDeps/index.tsx)
 
 当某些 `state` 变化时，我们需要重新执行异步请求，一般我们会这样写代码：
 
@@ -259,7 +263,7 @@ const { data, run, loading } = useAPI(() => {
 
 ##### 示例 1
 
-[在线演示](./examples/src/pages/pagination/index.tsx)
+[代码示例](./examples/src/pages/pagination/index.tsx)
 
 普通的分页场景，我们会自动管理 `current` 和 `pageSize` 
 
@@ -274,7 +278,7 @@ const { data, loading, pagination } = useAPI(
 
 ##### 示例 2
 
-[在线演示](./examples/src/pages/pagination1/index.tsx)
+[代码示例](./examples/src/pages/pagination1/index.tsx)
 
 由于 antd [Table](https://ant.design/components/table-cn/) 使用比较广泛，我们特别支持了 antd Table 需要的分页格式，及 `sorter` 、 `filters` 等。你可以通过 `result.tableProps` ， `result.filters` ， `result.sorter` 访问到这些属性。 
 
@@ -290,7 +294,7 @@ return (<Table columns={columns} rowKey="id" {...tableProps} />);
 
 ##### 示例 3
 
-[在线演示](./examples/src/pages/pagination2/index.tsx)
+[代码示例](./examples/src/pages/pagination2/index.tsx)
 
 在 `cacheKey` 场景下， `run` 的参数 `params` 是可以缓存的，利用这个特点，我们可以实现 pagination 相关条件的缓存。
 
@@ -301,7 +305,7 @@ return (<Table columns={columns} rowKey="id" {...tableProps} />);
 
 #### 加载更多
 
-[在线演示](./examples/src/pages/loadMore/index.tsx)
+[代码示例](./examples/src/pages/loadMore/index.tsx)
 
 通过设置 `options.loadMore = true` ， useAPI 将以 loadMore 模式运行，此时会有以下特性：
 
