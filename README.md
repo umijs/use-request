@@ -24,7 +24,7 @@ Production-ready React Hooks library for manage asynchronous data.
 
 ### 安装
 
-```
+```shell
 $ npm i @umijs/use-api --save
 # or 
 $ yarn add @umijs/use-api
@@ -32,7 +32,7 @@ $ yarn add @umijs/use-api
 
 ### 使用
 
-```shell
+```javascript
 //service 为异步函数。
 const {data, error, loading} = useAPI(service);
 ```
@@ -50,19 +50,37 @@ export default () => {
 }
 ```
 
-在这个例子中， `useAPI` 接收了一个异步函数 `getUserInfo` ，在组件初次加载时，自动触发该函数执行。同时 `useAPI` 会自动管理异步请求的 `loading` , `data` , `error` 等状态。
+在这个例子中， useAPI 接收了一个异步函数 `getUserInfo` ，在组件初次加载时，自动触发该函数执行。同时 useAPI 会自动管理异步请求的 `loading` , `data` , `error` 等状态。
 
 ## 文档
+* 示例
+  * [默认请求](#默认请求)
+  * [手动触发](#手动触发)
+  * [突变](#突变)
+  * [轮询](#轮询)
+  * [防抖](#防抖)
+  * [节流](#节流)
+  * [缓存 & SWR](#缓存--swr)
+  * [并行请求](#并行请求)
+  * [Loading Delay](#loading-delay)
+  * 高级用法
+    * [分页](分页)
+    * [加载更多](加载更多)
+* [API](#api)
+* [高级 API](#高级-API)
+  * [分页 API](#分页-API)
+  * [加载更多 API](#加载更多-API)
+
 
 #### 默认请求
 
-在线演示
+[在线演示](./examples/src/pages/index.tsx)
 
-如 [快速开始](#jJdlu) 例子一样， `useAPI` 在组件初始化时会默认执行 service。
+如 [快速开始](#使用) 例子一样， useAPI 在组件初始化时会默认执行 service。
 
 #### 手动触发
 
-在线演示
+[在线演示](./examples/src/pages/manual/index.tsx)
 
 通过设置 `options.manual = true` , 则需要手动调用 `run` 时才会触发执行。
 
@@ -76,11 +94,9 @@ const { loading, run } = useAPI(changeUsername, {
 </button>
 ```
 
-
-
 #### 突变
 
-在线演示
+[在线演示](./examples/src/pages/mutate/index.tsx)
 
 你可以通过 `mutate` ，直接修改 `data` 。 `mutate` 函数参数可以为 `newData` 或 `(data)=> newData` 。
 
@@ -94,7 +110,7 @@ const { data, mutate } = useAPI(getUserInfo);
 
 #### 轮询
 
-在线演示
+[在线演示](./examples/src/pages/polling/index.tsx)
 
 通过设置 `pollingInterval` ，进入轮询模式，定时触发函数执行。同时可以通过设置 `pollingWhenHidden = false` ，在屏幕不可见时，暂时暂停定时任务。
 
@@ -110,7 +126,7 @@ const { data, loading } = useAPI(getUserInfo, {
 
 #### 防抖
 
-在线演示
+[在线演示](./examples/src/pages/debounce/index.tsx)
 
 通过设置 `debounceInterval` ，则进入防抖模式。此时如果频繁触发 `run` ，则会以防抖策略进行请求。
 
@@ -122,7 +138,7 @@ const { data, loading, run } = useAPI(getUserInfo, {
 
 #### 节流
 
-在线演示
+[在线演示](./examples/src/pages/throttle/index.tsx)
 
 通过设置 `throttleInterval` ，则进入节流模式。此时如果频繁触发 `run` ，则会以节流策略进行请求。
 
@@ -134,9 +150,9 @@ const { data, loading, run } = useAPI(getUserInfo, {
 
 #### 缓存 & SWR
 
-在线演示
+[在线演示](./examples/src/pages/cache/index.tsx)
 
-如果设置了 `cacheKey` ， `useAPI` 会将当前请求结束数据缓存起来。下次组件初始化时，如果有缓存数据，我们会优先返回缓存数据，然后在背后发送新请求，也就是 SWR 的能力。
+如果设置了 `cacheKey` ， useAPI 会将当前请求结束数据缓存起来。下次组件初始化时，如果有缓存数据，我们会优先返回缓存数据，然后在背后发送新请求，也就是 SWR 的能力。
 
 ```jsx
 const { data, loading, run } = useAPI(getInfo, {
@@ -144,17 +160,18 @@ const { data, loading, run } = useAPI(getInfo, {
 });
 ```
 
-![2020-01-02 17.09.49.gif](https://intranetproxy.alipay.com/skylark/lark/0/2020/gif/112013/1577956425789-5d8996d2-08e5-4834-9121-c74fb5f067f7.gif)
+![1](https://user-images.githubusercontent.com/12526493/71711341-91114e00-2e3b-11ea-8509-96b8be4dfa4f.gif)
+
 
 #### 预加载
 
-在线演示
+[在线演示](./examples/src/pages/preload/index.tsx)
 
 同一个 `cacheKey` 的请求，是全局共享的，也就是你可以提前加载数据。利用该特性，可以很方便的实现预加载。你可以在线上例子中体验一下。
 
 #### 屏幕聚焦重新请求
 
-在线演示
+[在线演示](./examples/src/pages/refreshOnWindowFocus/index.tsx)
 
 如果你设置了 `refreshOnWindowFocus = true` ，则在浏览器窗口 `refouc` 和 `revisible` 时，会重新发起请求。
 
@@ -169,7 +186,8 @@ const { data, loading } = useAPI(getUserInfo, {
 
 #### 并行请求
 
-在线演示1 在线演示2
+[在线演示1](./examples/src/pages/fetchKey/index.tsx)
+[在线演示2](./examples/src/pages/fetchKey2/index.tsx)
 
 通过 `fetchKey` ，可以将请求进行分类，每一类的请求都有独立的状态，你可以在 `fetches` 中找到所有的请求。
 
@@ -180,11 +198,14 @@ const { run, fetches } = useAPI(disableUser, {
 });
 ```
 
-![2020-01-02 17.40.42.gif](https://intranetproxy.alipay.com/skylark/lark/0/2020/gif/112013/1577958061985-b55398ca-3818-4f53-b034-f018a612c488.gif)![2020-01-02 17.54.51.gif](https://intranetproxy.alipay.com/skylark/lark/0/2020/gif/112013/1577959019542-e67a4989-985a-41b2-90a4-6491246b8fef.gif)
+![2](https://user-images.githubusercontent.com/12526493/71711420-ecdbd700-2e3b-11ea-90b3-2584c6f395df.gif)
+
+![3](https://user-images.githubusercontent.com/12526493/71711424-ef3e3100-2e3b-11ea-8bda-f9e0b3642340.gif)
+
 
 #### Loading Delay
 
-在线演示
+[在线演示](./examples/src/pages/loadingDelay/index.tsx)
 
 通过设置 `loadingDelay` ，可以延迟 `loading` 变成 `true` 的时间，有效防止请求抖动。
 
@@ -194,13 +215,13 @@ const withLoadingDelayAction = useAPI(getCurrentTime, {
 });
 ```
 
-![2020-01-02 18.05.51.gif](https://intranetproxy.alipay.com/skylark/lark/0/2020/gif/112013/1577959574702-c568235e-c67e-46d6-896b-906bd12b1e4d.gif)
+![4](https://user-images.githubusercontent.com/12526493/71711470-375d5380-2e3c-11ea-9727-38d00c45cf0c.gif)
 
 #### refreshDeps
 
-在线演示
+[在线演示](./examples/src/pages/refreshDeps/index.tsx)
 
-当某些 state 变化时，我们需要重新执行异步请求，一般我们会这样写代码：
+当某些 `state` 变化时，我们需要重新执行异步请求，一般我们会这样写代码：
 
 ```jsx
 const [userId, setUserId] = useState('1');
@@ -225,19 +246,18 @@ const { data, run, loading } = useAPI(() => {
 
 #### 分页
 
-通过设置 `options.paginated = true` ， `useAPI` 将以分页模式运行，此时会有以下特性：
+通过设置 `options.paginated = true` ， useAPI 将以分页模式运行，此时会有以下特性：
 
 - useAPI 会自动管理分页 `current` , `pageSize` 。service 的第一个参数为 `{current, pageSize}` 。
 - service 返回的数据结构必须为 `{list: Item[], total: number}` ，如果不满足，可以通过 `options.formatResult` 转换一次。
 - 会额外返回 `pagination` 字段，包含所有分页信息，及操作分页的函数。
 - `refreshDeps` 变化，会重置 `current` 到第一页，并重新发起请求，一般你可以把 pagination 依赖的条件放这里。
-- 更多信息可查看 [API](#分页)。
-
+- 更多信息可查看 [API](#分页-1)。
 
 
 ##### 示例 1
 
-在线演示
+[在线演示](./examples/src/pages/pagination/index.tsx)
 
 普通的分页场景，我们会自动管理 `current` 和 `pageSize` 
 
@@ -252,7 +272,7 @@ const { data, loading, pagination } = useAPI(
 
 ##### 示例 2
 
-在线演示
+[在线演示](./examples/src/pages/pagination1/index.tsx)
 
 由于 antd [Table](https://ant.design/components/table-cn/) 使用比较广泛，我们特别支持了 antd Table 需要的分页格式，及 `sorter` 、 `filters` 等。你可以通过 `result.tableProps` ， `result.filters` ， `result.sorter` 访问到这些属性。 
 
@@ -268,20 +288,20 @@ return (<Table columns={columns} rowKey="id" {...tableProps} />);
 
 ##### 示例 3
 
-在线演示
+[在线演示](./examples/src/pages/pagination2/index.tsx)
 
 在 `cacheKey` 场景下， `run` 的参数 `params` 是可以缓存的，利用这个特点，我们可以实现 pagination 相关条件的缓存。
 
 一个复杂的带条件，带缓存的 pagination 例子。
 
-![2020-01-02 20.24.16.gif](https://intranetproxy.alipay.com/skylark/lark/0/2020/gif/112013/1577967880301-bbc8c6c6-8432-4e82-91d5-24fb252441ee.gif)
+![5](https://user-images.githubusercontent.com/12526493/71711583-a5a21600-2e3c-11ea-9a03-b57b20d536db.gif)
 
 
 #### 加载更多
 
-在线演示
+[在线演示](./examples/src/pages/loadMore/index.tsx)
 
-通过设置 `options.loadMore = true` ， `useAPI` 将以 loadMore 模式运行，此时会有以下特性：
+通过设置 `options.loadMore = true` ， useAPI 将以 loadMore 模式运行，此时会有以下特性：
 
 - service 返回的数据结构必须包含 `{list: Item[], nextId: string|undefined}` ，如果不满足，可以通过 `options.formatResult` 转换一次。
 - useAPI 会自动管理列表数据 。service 的第一个参数为 `nextId`。
@@ -297,7 +317,8 @@ const { data, run, loadMore, loading, loadingMore } = useAPI((nextId) => {
 });
 ```
 
-![2020-01-03 11.08.16.gif](https://intranetproxy.alipay.com/skylark/lark/0/2020/gif/112013/1578020913107-aaf9ab31-33f8-40cf-93ec-effcde6a4568.gif)
+![6](https://user-images.githubusercontent.com/12526493/71711620-ca968900-2e3c-11ea-8e73-e93f535cc271.gif)
+
 
 ### API
 
@@ -320,7 +341,7 @@ const {
   onError,
   formatResult,
   cacheKey,
-    loadingDelay,
+  loadingDelay,
   defaultParams,
   pollingInterval,
   pollingWhenHidden,
@@ -448,11 +469,11 @@ const {
 
   - 节流间隔, 单位为毫秒，设置后，请求进入节流模式。
 
-### 高级用法
+### 高级 API
 
-基于基础的 useAPI，我们可以进一步封装，实现多种定制需求。当前 useAPI 内置了 `分页` 和 `加载更多` 两种场景。你可以参考代码，实现自己的封装。参考 [usePaginated](https://github.com/umijs/use-api/blob/master/src/usePaginated.ts)、[useLoadMore](https://github.com/umijs/use-api/blob/master/src/useLoadMore.ts) 的实现。
+基于基础的 useAPI，我们可以进一步封装，实现多种定制需求。当前 useAPI 内置了 `分页` 和 `加载更多` 两种场景。你可以参考代码，实现自己的封装。参考 [usePaginated](./src/usePaginated.ts)、[useLoadMore](./src/useLoadMore.ts) 的实现。
 
-#### 分页
+#### 分页 API
 
 ```javascript
 const {
@@ -521,7 +542,7 @@ const {
 
   - 分页模式下， `refreshDeps` 变化，会重置 `current` 到第一页，并重新发起请求，一般你可以把依赖的条件放这里。
 
-#### 加载更多
+#### 加载更多 API
 
 ```javascript
 const {
