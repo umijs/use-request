@@ -70,8 +70,8 @@ export default () => {
   * [并行请求](#并行请求)
   * [Loading Delay](#loading-delay)
   * 高级用法
-    * [分页](分页)
-    * [加载更多](加载更多)
+    * [分页](#分页)
+    * [加载更多](#加载更多)
 * [API](#api)
 * [高级 API](#高级-API)
   * [分页 API](#分页-API)
