@@ -12,7 +12,7 @@ export default () => {
 
   return (
     <div>
-      <p>你可以尝试鼠标点击到其他地方，再点回来试试。（或者页面隐藏，再显示）</p>
+      <p>You can try to click elsewhere and click back to try. (Or hide the page and show it again)</p>
       <Spin spinning={loading}>
         <div>userId: {data?.id}</div>
         <div>usrename: {data?.username}</div>

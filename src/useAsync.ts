@@ -1,56 +1,256 @@
-/**
- * useAsync
- * 我们先预设一下场景：
- * 1. 一个 useAsync 会被触发很多次，发多次请求。
- *    1.1 有些时候我们只希望保存最新请求的状态，也就是新的请求一定会覆盖旧的请求。
- *    1.2 有些时候我们希望保存每一次请求的状态，比如我们一般执行“删除”操作，同时删除 n 条，我们并不希望将请求合并。
- * 2. 如果有轮询，并且同时触发了多次 run，一定是以最后一次请求为基准的。也就是，新的请求会取消之前的轮询。
- *
- * 基于以上的假设，我们看下实现原理
- * history & fetchKey: 以 key 分类，记录所有的请求。
- *    - history 是一个 object，会记录每一类的请求状态（注意不是每一次，是每一类）
- *    - 默认情况下 history 只存在一类：DEFAULT_KEY
- *    - 用户可以通过 fetchkey 来设置当前请求的分类。fetchKey 是一个函数，接收当前请求的 params。
- *    - ！！！ 默认 data/error/loading 等，等于最新的 history，通过 newstKey 来记录哪个是最新的请求。
- * count: 每一次请求，都有一个编号。
- *    - 只有最新的请求，在结束后，才允许触发轮询。
- *    - 每一类（同一 key）请求，只有最新的才会生效。也就是同一类请求，也会存在覆盖关系。通过 runKeyCount 记录 key 与 count 的对应关系。
- */
-
+import debounce from 'lodash.debounce';
+import throttle from 'lodash.throttle';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { BaseOptions, BaseResult, Options, OptionsWithFormat } from './types';
+import { BaseOptions, BaseResult, FetchConfig, Fetches, FetchResult, noop, Options, OptionsWithFormat, Service, Subscribe } from './types';
 import { isDocumentVisible } from './utils';
 import { getCache, setCache } from './utils/cache';
-import useDebounce from './utils/useDebounce';
-import useLimitFn from './utils/useLimitFn';
-import useThrottle from './utils/useThrottle';
+import limit from './utils/limit';
+import usePersistFn from './utils/usePersistFn';
 import useUpdateEffect from './utils/useUpdateEffect';
 import subscribeFocus from './utils/windowFocus';
 import subscribeVisible from './utils/windowVisible';
 
+
 const DEFAULT_KEY = 'UMIJS_USE_API_DEFAULT_KEY';
 
+class Fetch<R, P extends any[]> {
+  config: FetchConfig<R, P>;
+  service: Service<R, P>;
+
+  // 请求时序
+  count = 0;
+
+  // 是否卸载
+  unmountedFlag = false;
+  // visible 后，是否继续轮询
+  pollingWhenVisibleFlag = false;
+
+  pollingTimer: any = undefined;
+  loadingDelayTimer: any = undefined;
+
+  subscribe: Subscribe<R, P>;
+
+  unsubscribe: noop[] = [];
+
+  that: any = this;
+
+  state: FetchResult<R, P> = {
+    loading: false,
+    params: [] as any,
+    data: undefined,
+    error: undefined,
+    run: this.run.bind(this.that),
+    mutate: this.mutate.bind(this.that),
+    refresh: this.refresh.bind(this.that),
+    cancel: this.cancel.bind(this.that),
+    unmount: this.unmount.bind(this.that),
+  }
+
+  debounceRun: any;
+  throttleRun: any;
+  limitRefresh: any;
+
+  constructor(
+    service: Service<R, P>,
+    config: FetchConfig<R, P>,
+    subscribe: Subscribe<R, P>,
+    initState?: { data?: any, error?: any, params?: any, loading?: any }
+  ) {
+
+    this.service = service;
+    this.config = config;
+    this.subscribe = subscribe;
+    if (initState) {
+      this.state = {
+        ...this.state,
+        ...initState,
+      }
+    }
+
+    this.debounceRun = this.config.debounceInterval ? debounce(this._run, this.config.debounceInterval) : undefined;
+    this.throttleRun = this.config.throttleInterval ? throttle(this._run, this.config.throttleInterval) : undefined;
+    this.limitRefresh = limit(this.refresh.bind(this), this.config.focusTimespan);
+
+    if (this.config.pollingInterval) {
+      this.unsubscribe.push(subscribeVisible(this.rePolling.bind(this)));
+    }
+    if (this.config.refreshOnWindowFocus) {
+      this.unsubscribe.push(subscribeFocus(this.limitRefresh.bind(this)));
+    }
+  }
+
+  setState(s = {}) {
+    this.state = {
+      ...this.state,
+      ...s
+    }
+    this.subscribe(this.state);
+  }
+
+  _run(...args: P) {
+    // 取消已有定时器
+    if (this.pollingTimer) {
+      clearTimeout(this.pollingTimer);
+    }
+    // 取消 loadingDelayTimer
+    if (this.loadingDelayTimer) {
+      clearTimeout(this.loadingDelayTimer);
+    }
+    this.count += 1;
+    // 闭包存储当次请求的 count
+    const currentCount = this.count;
+
+    this.setState({
+      loading: this.config.loadingDelay ? false : true,
+      params: args
+    });
+
+    if (this.config.loadingDelay) {
+      this.loadingDelayTimer = setTimeout(() => {
+        this.setState({
+          loading: true,
+        });
+      }, this.config.loadingDelay);
+    }
+
+    return this.service(...args).then(res => {
+      if (!this.unmountedFlag && currentCount === this.count) {
+        if (this.loadingDelayTimer) {
+          clearTimeout(this.loadingDelayTimer);
+        }
+        const formattedResult = this.config.formatResult ? this.config.formatResult(res) : res;
+        this.setState({
+          data: formattedResult,
+          error: undefined,
+          loading: false
+        });
+        if (this.config.onSuccess) {
+          this.config.onSuccess(formattedResult, args);
+        }
+        return formattedResult;
+      }
+    }).catch(error => {
+      if (!this.unmountedFlag && currentCount === this.count) {
+        if (this.loadingDelayTimer) {
+          clearTimeout(this.loadingDelayTimer);
+        }
+        this.setState({
+          data: undefined,
+          error,
+          loading: false
+        });
+        if (this.config.onError) {
+          this.config.onError(error, args);
+        }
+        return error;
+        // throw error;
+      }
+    }).finally(() => {
+      if (!this.unmountedFlag && currentCount === this.count) {
+        if (this.config.pollingInterval) {
+          // 如果屏幕隐藏，并且 !pollingWhenHidden, 则停止轮询，并记录 flag，等 visible 时，继续轮询
+          if (!isDocumentVisible() && !this.config.pollingWhenHidden) {
+            this.pollingWhenVisibleFlag = true;
+            return;
+          }
+          this.pollingTimer = setTimeout(() => {
+            this._run(...args);
+          }, this.config.pollingInterval);
+        }
+      }
+    });
+
+  }
+
+  run(...args: P) {
+    if (this.debounceRun) {
+      this.debounceRun(...args);
+      return;
+    }
+    if (this.throttleRun) {
+      this.throttleRun(...args);
+      return;
+    }
+    return this._run(...args);
+  }
+
+  cancel() {
+    if (this.debounceRun) {
+      this.debounceRun.cancel();
+    }
+    if (this.throttleRun) {
+      this.throttleRun.cancel();
+    }
+    if (this.loadingDelayTimer) {
+      clearTimeout(this.loadingDelayTimer);
+    }
+    if (this.pollingTimer) {
+      clearTimeout(this.pollingTimer);
+    }
+    this.pollingWhenVisibleFlag = false;
+
+    this.count += 1;
+    this.setState({
+      loading: false
+    });
+
+  }
+
+  refresh() {
+    this.run(...this.state.params);
+  }
+
+  rePolling() {
+    if (this.pollingWhenVisibleFlag) {
+      this.pollingWhenVisibleFlag = false;
+      this.refresh();
+    }
+  }
+
+  mutate(data: any) {
+    if (typeof data === 'function') {
+      this.setState({
+        data: data(this.state.data) || {}
+      });
+    } else {
+      this.setState({
+        data
+      });
+    }
+  }
+
+  unmount() {
+    this.unmountedFlag = true;
+    this.cancel();
+    this.unsubscribe.forEach((s) => {
+      s();
+    });
+  }
+
+}
+
 function useAsync<R, P extends any[], U, UU extends U = any>(
-  service: (...args: P) => Promise<R>,
+  service: Service<R, P>,
   options: OptionsWithFormat<R, P, U, UU>
 ): BaseResult<U, P>
 function useAsync<R, P extends any[]>(
-  service: (...args: P) => Promise<R>,
+  service: Service<R, P>,
   options?: BaseOptions<R, P>
 ): BaseResult<R, P>
 function useAsync<R, P extends any[], U, UU extends U = any>(
-  service: (...args: P) => Promise<R>,
+  service: Service<R, P>,
   options?: Options<R, P, U, UU>
-) {
+): BaseResult<U, P> {
 
-  const _options: Options<R, P, U, UU> = options || ({} as Options<R, P, U, UU>);
-
+  const _options = options || {} as Options<R, P, U, UU>;
   const {
     refreshDeps = [],
-    extraCacheDeps = [],
     manual = false,
-    onSuccess,
-    onError,
+    onSuccess = () => { },
+    onError = () => { },
+
+    loadingDelay,
+
     pollingInterval = 0,
     pollingWhenHidden = true,
 
@@ -59,314 +259,189 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
     focusTimespan = 5000,
     fetchKey,
     cacheKey,
-    // staleTime = 2000,
-    debounceInterval = 0,
-    throttleInterval = 0
+    debounceInterval,
+    throttleInterval,
+    initialData
   } = _options;
 
-  // 是否卸载
-  const unmountFlag = useRef(false);
-  // 屏幕 visible 后，是否需要开启定时器
-  const pollingWhenVisibleFlag = useRef(false);
+  const newstFetchKey = useRef(DEFAULT_KEY);
 
-  // 轮询定时器
-  const timerRef = useRef<any>();
+  // 持久化一些函数
+  const servicePersist = usePersistFn(service) as any;
 
-  // 防止调用函数时，产生 capture value 问题
-  const serviceRef = useRef(service);
-  serviceRef.current = service;
+  const onSuccessPersist = usePersistFn(onSuccess);
 
-  const onSuccessRef = useRef(onSuccess);
-  onSuccessRef.current = onSuccess;
+  const onErrorPersist = usePersistFn(onError);
 
-  const onErrorRef = useRef(onError);
-  onErrorRef.current = onError;
+  const fetchKeyPersist = usePersistFn(fetchKey);
 
-  const fetchKeyRef = useRef(fetchKey);
-  fetchKeyRef.current = fetchKey;
 
-  const formatResultRef = useRef<any>();
+  let formatResult: any;
   if ("formatResult" in _options) {
-    formatResultRef.current = _options.formatResult;
+    formatResult = _options.formatResult;
+  }
+  const formatResultPersist = usePersistFn(formatResult);
+
+  const config = {
+    formatResult: formatResultPersist,
+    onSuccess: onSuccessPersist,
+    onError: onErrorPersist,
+    loadingDelay,
+    pollingInterval,
+    pollingWhenHidden,
+    refreshOnWindowFocus,
+    focusTimespan,
+    debounceInterval,
+    throttleInterval
   }
 
-  // 时序控制，每一次请求都有一个唯一的编号
-  const count = useRef(0);
 
-  // 每一类请求都有一个唯一的 Key, newstKey 代表最新的那一类的 key
-  // key 是由用户输入的 fetchKey 生成的
-  const newstKey = useRef<string | number>(DEFAULT_KEY);
+  const subscribe = usePersistFn((key: string, data: any) => {
+    setFeches((s) => {
+      s[key] = data;
+      return { ...s };
+    });
+  }, []) as any;
 
-  // key 与 count 的对应关系，每一类 key 只有最新的 count 才有效
-  // {[key:string]: number}
-  const runKeyCount = useRef<any>({});
-
-  const getCacheGroupKey = useCallback((...args: any[]) => {
-    if (!cacheKey) {
-      return null;
-    }
-    return JSON.stringify([cacheKey, ...args, ...refreshDeps, ...extraCacheDeps]);
-  }, [cacheKey, refreshDeps, extraCacheDeps]);
-
-  // 请求历史
-  const [history, setHistory] = useState<any>(() => {
-
-    let initCacheData;
-    // 如果是自动执行的，初始化的时候读缓存的数据
-    if (!manual && cacheKey) {
-      const cacheRes = getCache(getCacheGroupKey(...defaultParams) as string);
-      if (cacheRes) {
-        initCacheData = formatResultRef.current ? formatResultRef.current(cacheRes) : cacheRes;
+  const [fetches, setFeches] = useState<Fetches<U, P>>(() => {
+    // 如果有 缓存，则从缓存中读数据
+    if (cacheKey) {
+      const cache = getCache(cacheKey);
+      if (cache) {
+        newstFetchKey.current = cache.newstFetchKey;
+        /* 使用 initState, 重新 new Fetch */
+        const newFetches: any = {};
+        Object.keys(cache.fetches).forEach((key) => {
+          const cacheFetch = cache.fetches[key];
+          const newFetch = new Fetch(
+            servicePersist,
+            config,
+            subscribe.bind(null, key),
+            {
+              loading: cacheFetch.loading,
+              params: cacheFetch.params,
+              data: cacheFetch.data,
+              error: cacheFetch.error
+            }
+          );
+          newFetches[key] = newFetch.state;
+        });
+        return newFetches;
       }
     }
-
-    return {
-      [DEFAULT_KEY]: {
-        params: [] as any[],
-        data: initCacheData,
-        error: undefined as (Error | undefined),
-        loading: !manual,
-        cancel: () => { cancelProxyRef.current(DEFAULT_KEY) },
-        refresh: () => { refreshRef.current(DEFAULT_KEY) }
-      }
-    }
+    return []
   });
 
-  const historyRef = useRef(history);
-  historyRef.current = history;
 
-  const runProxyRef = useRef<any>();
-  const cancelProxyRef = useRef<any>();
-  const refreshRef = useRef<any>();
-  // refresh 某个 history
-  const refresh = useCallback((key) => {
-    runProxyRef.current(...historyRef.current[key].params);
-  }, []);
-  refreshRef.current = refresh;
-
-  /* 根据 key，取消某一类 history */
-  const cancel = useCallback((key) => {
-    // count 为 -1，就不会处理响应结果了，相当于取消。因为正在执行的请求, count 永远不可能等于 -1。
-    runKeyCount.current[key] = -1;
-    setHistory((s: any) => {
-      s[key] = {
-        ...s[key],
-        loading: false,
-      }
-      return { ...s };
-    });
-  }, []);
+  const fetchesRef = useRef(fetches);
+  fetchesRef.current = fetches;
 
   const run = useCallback((...args: P) => {
-    // 取消已有定时器
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
+    if (fetchKeyPersist) {
+      const key = fetchKeyPersist(...args);
+      newstFetchKey.current = key === undefined ? DEFAULT_KEY : key;
     }
-    // 请求编号加一
-    count.current += 1;
-    // 闭包存储当前请求 count
-    const runCount = count.current;
-
-    // 读取当前最新 newstKey
-    if (fetchKeyRef.current) {
-      newstKey.current = fetchKeyRef.current(...args);
-    }
-    // 闭包存储当前请求 分类 key
-    const runKey = newstKey.current;
-
-    // 记录该 runKey 下最新的 count，同一个 runKey，老的 count 均需要废弃
-    runKeyCount.current[runKey] = runCount;
-
-    // 从缓存读数据
-    let cacheData: R;
-    const cacheGroupKey = getCacheGroupKey(...args);
-    if (cacheGroupKey) {
-      const cacheRes = getCache(cacheGroupKey);
-      if (cacheRes) {
-        cacheData = formatResultRef.current ? formatResultRef.current(cacheRes) : cacheRes;
-      }
-    }
-
-    setHistory((s: any) => {
-      s[runKey] = {
-        data: cacheData || s[runKey]?.data || undefined,
-        error: s[runKey]?.error || undefined,
-        loading: true,
-        params: args,
-        cancel: () => {
-          cancelProxyRef.current(runKey);
-        },
-        refresh: () => {
-          refreshRef.current(runKey);
+    const currentFetchKey = newstFetchKey.current;
+    // 这里必须用 fetchsRef，而不能用 fetches。
+    // 否则在 reset 完，立即 run 的时候，这里拿到的 fetches 是旧的。
+    let currentFetch = fetchesRef.current[currentFetchKey];
+    if (!currentFetch) {
+      const newFetch = new Fetch(
+        servicePersist,
+        config,
+        subscribe.bind(null, currentFetchKey),
+        {
+          data: initialData
         }
-      }
-      return { ...s }
-    });
-
-    return serviceRef.current(...args).then(res => {
-      // 同一个 runKey，只有最新的 count 才会响应 
-      if (!unmountFlag.current && runCount === runKeyCount.current[runKey]) {
-
-        if (cacheGroupKey) {
-          setCache(cacheGroupKey, res);
-        }
-
-        const formattedResult = formatResultRef.current ? formatResultRef.current(res) : res;
-        setHistory((s: any) => {
-          s[runKey] = {
-            ...(s[runKey] || {}),
-            loading: false,
-            error: undefined,
-            data: formattedResult,
-          }
-          return { ...s }
-        });
-        if (onSuccessRef.current) {
-          onSuccessRef.current(formattedResult, args);
-        }
-        return formattedResult;
-      }
-    }).catch(error => {
-      if (!unmountFlag.current && runCount === runKeyCount.current[runKey]) {
-        setHistory((s: any) => {
-          s[runKey] = {
-            ...(s[runKey] || {}),
-            loading: false,
-            error,
-            data: undefined,
-          }
-          return { ...s }
-        });
-        if (onErrorRef.current) {
-          onErrorRef.current(error, args);
-        }
-        throw error;
-      }
-    }).finally(() => {
-      // 只有最新的请求，不管是哪个分类，才有资格 setTimeout
-      if (!unmountFlag.current && pollingInterval && runCount === count.current) {
-        // 如果屏幕隐藏，并且 !pollingWhenHidden, 则停止轮询，并记录 flag，等 visible 时，继续轮询
-        if (!isDocumentVisible() && !pollingWhenHidden) {
-          pollingWhenVisibleFlag.current = true;
-          return;
-        }
-        timerRef.current = setTimeout(() => {
-          refreshRef.current(runKey);
-        }, pollingInterval);
-      }
-    });
-  }, [pollingInterval, pollingWhenHidden, getCacheGroupKey]);
-
-  const runDebounce = useDebounce(run, debounceInterval);
-  const runThrottle = useThrottle(run, throttleInterval);
-
-  const runProxy = useCallback((...args: P) => {
-    if (debounceInterval) {
-      runDebounce.run(...args);
-      return;
+      );
+      currentFetch = newFetch.state;
+      setFeches((s) => {
+        s[currentFetchKey] = currentFetch;
+        return { ...s };
+      });
     }
-    if (throttleInterval) {
-      runThrottle.run(...args);
-      return;
-    }
-    run(...args);
-  }, [run, runDebounce, runThrottle]);
+    return currentFetch.run(...args);
 
-  runProxyRef.current = runProxy;
+  }, [fetchKey, subscribe])
 
-  const cancelProxy = useCallback((key: any) => {
-    if (runDebounce) {
-      runDebounce.cancel();
-    }
-    if (runThrottle) {
-      runThrottle.cancel();
-    }
-    cancel(key);
-  }, [cancel, runDebounce, runThrottle]);
-
-  cancelProxyRef.current = cancelProxy;
-
-  /*------------- polling start ---------------*/
-  // 停止轮询
-  const stopPolling = useCallback(() => {
-    // 取消当前正在等待的定时器
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    // 取消即将来临的定时器。因为只有最新的 count，在请求结束后，才允许触发定时器。count+1 后，就没任何请求是最新的了。
-    count.current += 1;
-  }, []);
-
-  const rePolling = useCallback(() => {
-    if (pollingWhenVisibleFlag.current) {
-      pollingWhenVisibleFlag.current = false;
-      timerRef.current = setTimeout(() => {
-        refreshRef.current(newstKey.current);
-      }, pollingInterval);
-    }
-  }, []);
+  // cache
   useEffect(() => {
-    if (pollingInterval) {
-      return subscribeVisible(rePolling);
+    if (cacheKey) {
+      setCache(cacheKey, {
+        fetches,
+        newstFetchKey: newstFetchKey.current
+      });
     }
-  }, []);
-  /*------------- polling end ---------------*/
+  }, [cacheKey, fetches]);
 
-  /*------------- refreshOnFocus start ---------------*/
-  const reFreshOnFocus = useLimitFn(() => {
-    refreshRef.current(newstKey.current);
-  }, focusTimespan);
-  useEffect(() => {
-    if (refreshOnWindowFocus) {
-      return subscribeFocus(reFreshOnFocus);
-    }
-  }, [reFreshOnFocus]);
-  /*------------- refreshOnFocus end ---------------*/
 
-  /*------------- mutate start ---------------*/
-  // 突变
-  const mutate = useCallback((newData) => {
-    setHistory((s: any) => {
-      s[newstKey.current].data = newData;
-      return { ...s };
-    });
-  }, []);
-  /*------------- mutate end ---------------*/
-
-  /*------------- mount&unmount start ---------------*/
   // 第一次默认执行
   useEffect(() => {
     if (!manual) {
-      // 第一次默认执行，可以通过 defaultParams 设置参数
-      runProxy(...defaultParams as any);
+      // 如果有缓存
+      if (Object.keys(fetches).length > 0) {
+        /* 重新执行所有的 */
+        Object.values(fetches).forEach((f) => {
+          f.refresh();
+        });
+      } else {
+        // 第一次默认执行，可以通过 defaultParams 设置参数
+        run(...defaultParams as any);
+      }
     }
   }, []);
 
-  //  refreshDeps 变化，使用最新的参数重新执行
+  // 重置 fetches
+  const reset = useCallback(() => {
+    Object.values(fetchesRef.current).forEach((f) => {
+      f.unmount();
+    });
+    newstFetchKey.current = DEFAULT_KEY;
+    setFeches({});
+    // 不写会有问题。如果不写，此时立即 run，会是老的数据
+    fetchesRef.current = {};
+  }, [setFeches]);
+
+  //  refreshDeps 变化，重新执行所有请求
   useUpdateEffect(() => {
     if (!manual) {
-      runProxyRef.current(...historyRef.current[newstKey.current].params);
+      /* 全部重新执行 */
+      Object.values(fetchesRef.current).forEach((f) => {
+        f.refresh();
+      });
     }
   }, [...refreshDeps]);
 
   // 卸载组件触发
   useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-      unmountFlag.current = true;
+      Object.values(fetchesRef.current).forEach((f) => {
+        f.unmount();
+      });
     };
   }, []);
-  /*------------- mount&unmount end ---------------*/
+
+
+  const noReady = useCallback((name: string) => {
+    return () => {
+      throw new Error(`Cannot call ${name} when service not executed once.`);
+    }
+  }, [])
 
   return {
-    ...history[newstKey.current],
-    stopPolling,
-    run: runProxy,
-    mutate,
-    history
-  } as BaseResult<U, P>
+    loading: !manual,
+    data: initialData,
+    error: undefined,
+    params: [],
+    cancel: noReady('cancel'),
+    refresh: noReady('refresh'),
+    mutate: noReady('mutate'),
+
+    ...(fetches[newstFetchKey.current] || {}),
+    run,
+    fetches,
+    reset
+  } as BaseResult<U, P>;
 }
 
 export default useAsync;

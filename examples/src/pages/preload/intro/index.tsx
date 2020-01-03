@@ -11,7 +11,8 @@ export default () => {
 
   return (
     <Spin spinning={!data && loading}>
-      {data}
+      <p>Latest request time: {data?.time}</p>
+      <p>{data?.data}</p>
     </Spin>
   );
 };

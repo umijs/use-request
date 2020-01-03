@@ -13,9 +13,9 @@ export default () => {
 
   return (
     <div>
-      <p>如果设置了 throttleInterval， useAPI 将以节流模式执行。你可以尝试快速输入字符。</p>
+      <p>Enter quickly to see the effect</p>
       <Select
-        showSearch
+        showSearch={true}
         placeholder="Select Emails"
         filterOption={false}
         onSearch={run}
