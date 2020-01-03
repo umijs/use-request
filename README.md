@@ -588,5 +588,7 @@ const {
 
 [MIT](https://github.com/umijs/use-api/blob/master/LICENSE)
 
+[1]:	https://www.npmjs.com/package/@umijs/use-api
+[2]:	https://npmjs.org/package/@umijs/use-api
 [image-1]:	https://img.shields.io/npm/v/@umijs/use-api.svg?style=flat
 [image-2]:	https://img.shields.io/npm/dm/@umijs/use-api.svg?style=flat
