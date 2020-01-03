@@ -192,8 +192,8 @@ const { data, loading } = useAPI(getUserInfo, {
 
 #### 并行请求
 
-[在线演示1](./examples/src/pages/fetchKey/index.tsx)
-[在线演示2](./examples/src/pages/fetchKey2/index.tsx)
+[代码示例1](./examples/src/pages/fetchKey/index.tsx)
+[代码示例2](./examples/src/pages/fetchKey2/index.tsx)
 
 通过 `fetchKey` ，可以将请求进行分类，每一类的请求都有独立的状态，你可以在 `fetches` 中找到所有的请求。
 
