@@ -38,11 +38,17 @@ const BasicLayout: React.FC = (props) => {
     name: '分页',
     path: '/pagination'
   }, {
+    name: 'loadMore',
+    path: '/loadMore'
+  }, {
     name: 'antd Table',
     path: '/antdTable'
   }, {
-    name: '并发请求',
+    name: '并行请求',
     path: '/fetchKey'
+  }, {
+    name: '并行请求2',
+    path: '/fetchKey2'
   }, {
     name: 'loadingDelay',
     path: '/loadingDelay'

@@ -1,16 +1,11 @@
 import { getUserInfo } from '@/service';
-import useAPI from '@umijs/use-api';
-import { Spin } from 'antd';
 import React from 'react';
-
+import useAPI from '@umijs/use-api';
 
 export default () => {
-  const { data, loading } = useAPI(getUserInfo);
+  const { data, error, loading } = useAPI(getUserInfo)
 
-  return (
-    <Spin spinning={loading}>
-      <div>userId: {data?.id}</div>
-      <div>usrename: {data?.username}</div>
-    </Spin>
-  );
-};
+  if (error) return <div>failed to load</div>
+  if (loading) return <div>loading...</div>
+  return <div>hello {data?.username}!</div>
+}

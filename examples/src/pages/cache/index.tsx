@@ -6,7 +6,7 @@ export default () => {
 
   return (
     <div>
-      <p>你可以尝试多次进入下面页面，我们会优先返回缓存的数据。</p>
+      <p>You can try to enter the following page multiple times, we will return the cached data first.</p>
       <ul>
         <li><Link to="/cache/intro">intro</Link></li>
         <li><Link to="/cache/article">article</Link></li>

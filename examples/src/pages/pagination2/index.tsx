@@ -44,11 +44,6 @@ export default () => {
 
   return (
     <div>
-      <div style={{ marginBottom: '24px' }}>
-        1. 分页场景，我们对 antd Table 做了特殊优化支持。<br />
-        2. 你可以在 tableProps 中拿到所有 Table 需要的数据。<br />
-        3. 支持 sorder 和 filters。
-      </div>
       <Button onClick={refresh} style={{ marginBottom: 16 }}>刷新</Button>
       <Table columns={columns} rowKey="id" {...tableProps} />
     </div>

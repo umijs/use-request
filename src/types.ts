@@ -2,33 +2,51 @@ import { PaginationConfig } from 'antd/lib/pagination';
 import { SorterResult } from 'antd/lib/table';
 import { DependencyList } from 'react';
 
-type noop = (...args: any[]) => void;
+export type noop = (...args: any[]) => void;
 
-/* ✅ --------------------------useAsync---------------------------- */
+export type Service<R, P extends any[]> = (...args: P) => Promise<R>;
+export type Subscribe<R, P extends any[]> = (data: FetchResult<R, P>) => void;
+export type Mutate<R> = (x: (data: R) => R) => void | ((data: R) => void);
 
-export interface BaseResult<T, K extends any[]> {
+export interface Fetches<R, P extends any[]> {
+  [key: string]: FetchResult<R, P>
+}
+export interface FetchResult<R, P extends any[]> {
   loading: boolean;
-  data: T | undefined;
-  error: Error | string | undefined;
+  data: R | undefined;
+  error: Error | undefined;
+  params: P;
+  cancel: noop;
+  refresh: noop;
+  mutate: Mutate<R>;
+  run: (...args: P) => void | Promise<R>;
+  unmount: () => void;
+}
 
-  run: (...args: K) => Promise<T>; // 手动触发
-  params: K | undefined; // 上一次手动触发的参数
+export interface FetchConfig<R, P extends any[]> {
+  formatResult?: (res: any) => R
 
-  cancel: noop; // 取消请求
-  refresh: noop; // 用当前参数重新请求一次
+  onSuccess?: (data: R, params: P) => void;
+  onError?: (e: Error, params: P) => void;
 
-  stopPolling: noop; // 停止轮询
+  loadingDelay?: number; // loading delay
 
-  mutate: (data: T) => void;
-  history: {
-    [key: string]: {
-      loading: boolean;
-      data: T | undefined;
-      error: Error | string | undefined;
-      params: K | undefined; // 上一次手动触发的参数
-      cancel: noop; // 取消请求
-      refresh: noop; // 用当前参数重新请求一次
-    }
+  // 轮询
+  pollingInterval?: number; // 轮询的间隔毫秒
+  pollingWhenHidden?: boolean; // 屏幕隐藏时，停止轮询
+
+  refreshOnWindowFocus?: boolean;
+  focusTimespan: number;
+
+  debounceInterval?: number;
+  throttleInterval?: number;
+
+}
+
+export interface BaseResult<R, P extends any[]> extends FetchResult<R, P> {
+  reset: () => void;
+  fetches: {
+    [key in string]: FetchResult<R, P>
   }
 }
 
@@ -45,19 +63,20 @@ export type BaseOptions<R, P extends any[]> = {
   pollingInterval?: number; // 轮询的间隔毫秒
   pollingWhenHidden?: boolean; // 屏幕隐藏时，停止轮询
 
-  fetchKey?: (...args: P) => string | number,
+  fetchKey?: (...args: P) => string,
 
   paginated?: false
+  loadMore?: false
 
   refreshOnWindowFocus?: boolean;
   focusTimespan?: number;
 
   cacheKey?: string;
-  extraCacheDeps?: DependencyList; // 暂时内部使用，不在文档上体现
-  // staleTime?: number;
 
   debounceInterval?: number;
   throttleInterval?: number;
+
+  initialData?: R;
 }
 
 export type OptionsWithFormat<R, P extends any[], U, UU extends U> = {
@@ -69,12 +88,12 @@ export type Options<R, P extends any[], U, UU extends U> = BaseOptions<R, P> | O
 
 /* ✅ --------------------------usePaginated---------------------------- */
 
-export interface PaginatedParams<Item> {
+export type PaginatedParams<Item> = [{
   current: number,
   pageSize: number,
   sorter?: SorterResult<Item>,
-  filters?: Record<keyof Item, string[]>
-}
+  filters?: Partial<Record<keyof Item, string[]>>
+}, ...any[]]
 
 export interface PaginatedFormatReturn<Item> {
   total: number,
@@ -82,7 +101,7 @@ export interface PaginatedFormatReturn<Item> {
   [key: string]: any;
 }
 
-export interface PaginatedResult<Item> extends BaseResult<PaginatedFormatReturn<Item>, [PaginatedParams<Item>]> {
+export interface PaginatedResult<Item> extends BaseResult<PaginatedFormatReturn<Item>, PaginatedParams<Item>> {
 
   // reload: noop; // 重置所有参数，包括分页数据数据等，重新执行 asyncFn
 
@@ -94,13 +113,14 @@ export interface PaginatedResult<Item> extends BaseResult<PaginatedFormatReturn<
     onChange: (current: number, pageSize: number) => void;
     changeCurrent: (current: number) => void;
     changePageSize: (pageSize: number) => void;
+    [key: string]: any
   };
   tableProps: {
     dataSource: Item[];
     loading: boolean;
     onChange: (
       pagination: PaginationConfig,
-      filters?: Record<keyof Item, string[]>,
+      filters?: Partial<Record<keyof Item, string[]>>,
       sorter?: SorterResult<Item>,
     ) => void;
     pagination: {
@@ -108,25 +128,46 @@ export interface PaginatedResult<Item> extends BaseResult<PaginatedFormatReturn<
       pageSize: number;
       total: number;
     };
+    [key: string]: any
   };
 
   sorter?: SorterResult<Item>;
   filters?: Record<keyof Item, string[]>;
 
-  // loadMore: () => void;
-  // loadingMore: boolean;
 }
 
 
-export interface BasePaginatedOptions<U> extends Omit<BaseOptions<PaginatedFormatReturn<U>, [PaginatedParams<U>]>, 'paginated'> {
+export interface BasePaginatedOptions<U> extends Omit<BaseOptions<PaginatedFormatReturn<U>, PaginatedParams<U>>, 'paginated'> {
   paginated: true;
   defaultPageSize?: number; // 默认每页数据
   // loadMorePageSize?: number; // 非第一页的 pageSize, for loadMore
 }
 
-export interface PaginatedOptionsWithFormat<R, Item, U> extends Omit<BaseOptions<PaginatedFormatReturn<U>, [PaginatedParams<U>]>, 'paginated'> {
+export interface PaginatedOptionsWithFormat<R, Item, U> extends Omit<BaseOptions<PaginatedFormatReturn<U>, PaginatedParams<U>>, 'paginated'> {
   paginated: true;
   defaultPageSize?: number; // 默认每页数据
   // loadMorePageSize?: number; // 非第一页的 pageSize, for loadMore
   formatResult: (data: R) => PaginatedFormatReturn<Item>;
+}
+
+/* ✅ --------------------------useLoadMore---------------------------- */
+export type LoadMoreParams = any[]
+
+export interface LoadMoreFormatReturn<Item> {
+  list: Item[];
+  nextId?: string;
+}
+
+export interface LoadMoreResult<Item> extends BaseResult<LoadMoreFormatReturn<Item>, LoadMoreParams> {
+  loadMore: () => void;
+  loadingMore: boolean;
+}
+
+export interface LoadMoreOptions<U> extends Omit<BaseOptions<LoadMoreFormatReturn<U>, LoadMoreParams>, 'loadMore'> {
+  loadMore: true;
+}
+
+export interface LoadMoreOptionsWithFormat<R, Item, U> extends Omit<BaseOptions<LoadMoreFormatReturn<U>, LoadMoreParams>, 'loadMore'> {
+  loadMore: true;
+  formatResult: (data: R) => LoadMoreFormatReturn<Item>;
 }

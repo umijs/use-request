@@ -18,7 +18,7 @@ export default () => {
 
   return (
     <div>
-      <p>当鼠标 hover 到链接上时，会预加载详情页数据。</p>
+      <p>When the mouse hovers over the link, the detail page data is preloaded.</p>
       <ul>
         <li><Link to="/preload/intro" onMouseEnter={() => getIntroAction.run()}>intro</Link></li>
         <li><Link to="/preload/article" onMouseEnter={() => getArticleAction.run()}>article</Link></li>

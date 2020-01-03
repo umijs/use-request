@@ -11,11 +11,11 @@ const article = Mock.mock('@paragraph');
 const userSchool = (id) => {
   switch (id) {
     case '1':
-      return '清华大学';
+      return 'Tsinghua University';
     case '2':
-      return '北京大学';
+      return 'Beijing University';
     case '3':
-      return '浙江大学';
+      return 'Zhejiang University';
     default:
       return ''
   }
@@ -53,12 +53,18 @@ export default {
   },
   '/api/article': (_, res) => {
     setTimeout(() => {
-      res.json(article)
+      res.json({
+        data: article,
+        time: new Date().getTime()
+      })
     }, 1000)
   },
   '/api/intro': (_, res) => {
     setTimeout(() => {
-      res.json('我们是 umijs 团队！')
+      res.json({
+        data: 'We are umijs team！',
+        time: new Date().getTime()
+      })
     }, 1000)
   },
   '/api/userSchool': (req, res) => {
