@@ -2,6 +2,8 @@
 
 Production-ready React Hooks library for manage asynchronous data.
 
+[![NPM version][image-1]][1] [![NPM downloads][image-2]][2]
+
 ## 特性
 
 - 自动请求/手动请求
@@ -585,3 +587,6 @@ const {
 ## License
 
 [MIT](https://github.com/umijs/use-api/blob/master/LICENSE)
+
+[image-1]:	https://img.shields.io/npm/v/@umijs/use-api.svg?style=flat
+[image-2]:	https://img.shields.io/npm/dm/@umijs/use-api.svg?style=flat
