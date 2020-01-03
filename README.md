@@ -22,6 +22,10 @@ Production-ready React Hooks library for manage asynchronous data.
 - [ ] suspense
 - ......
 
+## 在线体验
+
+[![Edit](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/umijsuse-apiexamples-9qlcf)
+
 ## 快速开始
 
 ### 安装
