@@ -4,11 +4,11 @@ import React from 'react';
 import Link from 'umi/link';
 
 interface Item {
-  id: number,
+  id?: string,
   name: string
 }
 
-const resultData = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+const resultData = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 function getList(nextId: any, limit: any): Promise<{ list: Item[], nextId: string | undefined }> {
   let start = 0;
@@ -20,12 +20,12 @@ function getList(nextId: any, limit: any): Promise<{ list: Item[], nextId: strin
     id,
     name: `project ${id} (server time: ${Date.now()})`
   }));
-  const nId = resultData.length >= end ? resultData[end] : null;
+  const nId = resultData.length >= end ? resultData[end] : undefined;
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({
         list,
-        nextId: nId + ''
+        nextId: nId
       });
     }, 1000);
   });
