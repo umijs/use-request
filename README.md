@@ -405,7 +405,7 @@ const {
 
 如果 service 是 `string` 、 `object` 、 `(...args)=> string|object`, 我们会自动使用 [um-request](https://github.com/umijs/umi-request/blob/master/README_zh-CN.md) 来发送网络请求。umi-request 是类似 axios、fetch 的请求库。
 
-[代码示例1](./examples/src/pages/request1.tsx) [代码示例2](./examples/src/pages/request2.tsx)
+[代码示例1](./examples/src/pages/request1/index.tsx) [代码示例2](./examples/src/pages/request2/index.tsx)
 
 ```javascript
 // 用法 1
