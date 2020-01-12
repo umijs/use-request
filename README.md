@@ -75,7 +75,8 @@ export default () => {
   * [集成请求库](#集成请求库)
   * [分页](#分页)
   * [加载更多](#加载更多)
-
+* [全局配置](#全局配置)
+  * [UseAPIProvider](#UseAPIProvider)
 
 #### 默认请求
 
@@ -430,7 +431,7 @@ const { loading, run } = useAPI((username) => ({
 ```
 
 Q：<b>如果我要使用 `axios`、`fetch` 咋办？如何设置 `umi-request` 的全局配置？</b>
-A：你可以通过设置 `requestMehod` 即可。参考 [示例代码](./examples/src/pages/axiosRequest.tsx)
+A：你可以通过设置 `requestMehod` 即可。参考 [示例代码](./examples/src/pages/axiosRequest.tsx)。当然，你可以通过 [UseAPIProvider](#UseAPIProvider) 全局设置请求方法哦。
 
 ##### API
 
@@ -628,6 +629,27 @@ const {
 - `refreshDeps`
 
   - 加载更多模式下， `refreshDeps` 变化，会清空当前数据，并重新发起请求，一般你可以把依赖的条件放这里。
+
+## 全局配置
+
+### UseAPIProvider
+你可以通过 `UseAPIProvider` 在项目的最外层设置全局 options。
+
+```tsx
+import {UseAPIProvider} from '@umijs/use-api';
+
+export function ({children})=>{
+  return (
+    <UseAPIProvider value={{
+      refreshOnWindowFocus: true,
+      requestMethod: (param)=> axios(param),
+      ...
+    }}>
+      {children}
+    </UseAPIProvider>
+  )
+}
+```
 
 ## 致谢
 - [zeit/swr](https://github.com/zeit/swr)

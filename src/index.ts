@@ -1,10 +1,10 @@
-import { useRef } from 'react';
+import { useRef, useContext } from 'react';
 import request from 'umi-request';
 import { BaseOptions, BasePaginatedOptions, BaseResult, CombineService, LoadMoreFormatReturn, LoadMoreOptions, LoadMoreOptionsWithFormat, LoadMoreParams, LoadMoreResult, OptionsWithFormat, PaginatedFormatReturn, PaginatedOptionsWithFormat, PaginatedParams, PaginatedResult } from './types';
 import useAsync from './useAsync';
 import useLoadMore from './useLoadMore';
 import usePaginated from './usePaginated';
-
+import ConfigContext from './configContext';
 
 function useAPI<R = any, P extends any[] = any, U = any, UU extends U = any>(
   service: CombineService<R, P>,
@@ -34,7 +34,10 @@ function useAPI<R = any, Item = any, U extends Item = any>(
 
 function useAPI(service: any, options: any = {}) {
 
-  const { paginated, loadMore, requestMehod } = options;
+  const contextConfig = useContext(ConfigContext);
+  const finalOptions = { ...contextConfig, ...options };
+
+  const { paginated, loadMore, requestMehod } = finalOptions;
 
   const paginatedRef = useRef(paginated);
   const loadMoreRef = useRef(loadMore);
@@ -80,14 +83,21 @@ function useAPI(service: any, options: any = {}) {
   }
 
   if (loadMore) {
-    return useLoadMore(promiseService, options);
+    return useLoadMore(promiseService, finalOptions);
   } else if (paginated) {
-    return usePaginated(promiseService, options);
+    return usePaginated(promiseService, finalOptions);
   } else {
-    return useAsync(promiseService, options);
+    return useAsync(promiseService, finalOptions);
   }
 }
 
-export { useAsync, usePaginated, useLoadMore };
+const UseAPIProvider = ConfigContext.Provider;
+
+export {
+  useAsync,
+  usePaginated,
+  useLoadMore,
+  UseAPIProvider
+};
 
 export default useAPI;
