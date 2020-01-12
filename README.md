@@ -465,7 +465,7 @@ const {...} = useAPI<R>(
 
 ##### 示例 1
 
-[代码示例](./examples/src/pages/pagination/index.tsx)
+[代码示例](./examples/src/pages/pagination1/index.tsx)
 
 普通的分页场景，我们会自动管理 `current` 和 `pageSize` 
 
@@ -480,7 +480,7 @@ const { data, loading, pagination } = useAPI(
 
 ##### 示例 2
 
-[代码示例](./examples/src/pages/pagination1/index.tsx)
+[代码示例](./examples/src/pages/pagination2/index.tsx)
 
 由于 antd [Table](https://ant.design/components/table-cn/) 使用比较广泛，我们特别支持了 antd Table 需要的分页格式，及 `sorter` 、 `filters` 等。你可以通过 `result.tableProps` ， `result.filters` ， `result.sorter` 访问到这些属性。 
 
@@ -496,7 +496,7 @@ return (<Table columns={columns} rowKey="id" {...tableProps} />);
 
 ##### 示例 3
 
-[代码示例](./examples/src/pages/pagination2/index.tsx)
+[代码示例](./examples/src/pages/pagination3/index.tsx)
 
 在 `cacheKey` 场景下， `run` 的参数 `params` 是可以缓存的，利用这个特点，我们可以实现 pagination 相关条件的缓存。
 

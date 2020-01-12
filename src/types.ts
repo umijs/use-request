@@ -1,5 +1,4 @@
-import { PaginationConfig } from 'antd/lib/pagination';
-import { SorterResult } from 'antd/lib/table';
+import { PaginationConfig, Filter, Sorter } from './antdTypes';
 import { DependencyList } from 'react';
 
 export type noop = (...args: any[]) => void;
@@ -97,8 +96,8 @@ export type Options<R, P extends any[], U, UU extends U> = BaseOptions<R, P> | O
 export type PaginatedParams<Item> = [{
   current: number,
   pageSize: number,
-  sorter?: SorterResult<Item>,
-  filters?: Partial<Record<keyof Item, string[]>>
+  sorter?: Sorter,
+  filters?: Filter
 }, ...any[]]
 
 export interface PaginatedFormatReturn<Item> {
@@ -126,19 +125,15 @@ export interface PaginatedResult<Item> extends BaseResult<PaginatedFormatReturn<
     loading: boolean;
     onChange: (
       pagination: PaginationConfig,
-      filters?: Partial<Record<keyof Item, string[]>>,
-      sorter?: SorterResult<Item>,
+      filters?: Filter,
+      sorter?: Sorter,
     ) => void;
-    pagination: {
-      current: number;
-      pageSize: number;
-      total: number;
-    };
+    pagination: PaginationConfig;
     [key: string]: any
   };
 
-  sorter?: SorterResult<Item>;
-  filters?: Record<keyof Item, string[]>;
+  sorter?: Sorter;
+  filters?: Filter,
 
 }
 

@@ -45,13 +45,13 @@ const BasicLayout: React.FC = (props) => {
     path: '/axiosRequest'
   }, {
     name: '分页',
-    path: '/pagination'
-  }, {
-    name: '分页2',
     path: '/pagination1'
   }, {
-    name: '分页3',
+    name: '分页2',
     path: '/pagination2'
+  }, {
+    name: '分页3',
+    path: '/pagination3'
   }, {
     name: 'loadMore',
     path: '/loadMore'
