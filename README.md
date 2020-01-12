@@ -431,7 +431,7 @@ const { loading, run } = useAPI((username) => ({
 ```
 
 Q：<b>如果我要使用 `axios`、`fetch` 咋办？如何设置 `umi-request` 的全局配置？</b>
-A：你可以通过设置 `requestMehod` 即可。参考 [示例代码](./examples/src/pages/axiosRequest.tsx)。当然，你可以通过 [UseAPIProvider](#UseAPIProvider) 全局设置请求方法哦。
+A：你可以通过设置 `requestMehod` 即可。参考 [示例代码](./examples/src/pages/axiosRequest/index.tsx)。当然，你可以通过 [UseAPIProvider](#UseAPIProvider) 全局设置请求方法哦。
 
 ##### API
 
