@@ -142,6 +142,7 @@ class Fetch<R, P extends any[]> {
         if (this.config.onError) {
           this.config.onError(error, args);
         }
+        console.error(error);
         return error;
         // throw error;
       }

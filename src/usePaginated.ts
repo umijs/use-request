@@ -1,5 +1,5 @@
-import { PaginationConfig } from 'antd/lib/pagination';
-import { SorterResult } from 'antd/lib/table';
+import { PaginationConfig, Sorter, Filter } from './antdTypes';
+
 import { useCallback, useMemo, useRef, useEffect } from 'react';
 import { BasePaginatedOptions, PaginatedFormatReturn, PaginatedOptionsWithFormat, PaginatedParams, PaginatedResult } from './types';
 import useAsync from './useAsync';
@@ -109,25 +109,11 @@ function usePaginated<R, Item, U extends Item = any>(
   const changeTable = useCallback(
     (
       p: PaginationConfig,
-      f?: Record<keyof U, string[]>,
-      s?: SorterResult<U>,
+      f?: Filter,
+      s?: Sorter,
     ) => {
-      // antd table 的初始状态 filter 带有 null 字段，需要先去除后再比较
-      const realFilter = { ...f };
-      Object.entries(realFilter).forEach(item => {
-        if (item[1] === null) {
-          delete (realFilter as Object)[item[0] as keyof Object];
-        }
-      });
-
-      /* 如果 filter，或者 sort 变化，就初始化 current */
-      const needReload =
-        !isEqual(realFilter, filters) ||
-        s?.field !== sorter?.field ||
-        s?.order !== sorter?.order;
-
       runChangePaination({
-        current: needReload ? 1 : (p.current || 1),
+        current: p.current,
         pageSize: p.pageSize || defaultPageSize,
         filters: f,
         sorter: s,

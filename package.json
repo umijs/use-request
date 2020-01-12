@@ -38,13 +38,13 @@
     "@types/jest": "^24.0.23",
     "@types/lodash.debounce": "^4.0.6",
     "@types/lodash.throttle": "^4.1.6",
-    "antd": "^3.20.1",
     "father": "^2.29.1",
     "react": "^16.12.0",
     "typescript": "^3.7.2"
   },
   "dependencies": {
     "lodash.debounce": "^4.0.8",
-    "lodash.throttle": "^4.1.1"
+    "lodash.throttle": "^4.1.1",
+    "umi-request": "^1.2.17"
   }
 }
