@@ -1,5 +1,5 @@
 import { getUserList } from '@/service';
-import useAPI from '../../../../src/index';
+import useAPI from '@umijs/use-api';
 import { Button, Table } from 'antd';
 import React from 'react';
 

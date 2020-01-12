@@ -112,33 +112,8 @@ function usePaginated<R, Item, U extends Item = any>(
       f?: Filter,
       s?: Sorter,
     ) => {
-      // antd table 的初始状态 filter 带有 null 字段，需要先去除后再比较
-      const newFilters = { ...f };
-      Object.entries(newFilters).forEach(item => {
-        if (item[1] === null) {
-          delete (newFilters as Object)[item[0] as keyof Object];
-        }
-      });
-
-      const oldFilters = { ...filters };
-      Object.entries(oldFilters).forEach(item => {
-        if (item[1] === null) {
-          delete (oldFilters as Object)[item[0] as keyof Object];
-        }
-      });
-
-      /* 如果 filter，或者 sort 变化，就初始化 current */
-      const needReload =
-        !isEqual(newFilters, oldFilters) ||
-        Array.isArray(s) !== Array.isArray(sorter) ||
-        (Array.isArray(s) && Array.isArray(sorter) && s.length !== sorter.length) ||
-        (!Array.isArray(s) && !Array.isArray(sorter) && (
-          s?.field !== sorter.field ||
-          s?.order !== sorter?.order
-        ))
-
       runChangePaination({
-        current: needReload ? 1 : (p.current || 1),
+        current: p.current,
         pageSize: p.pageSize || defaultPageSize,
         filters: f,
         sorter: s,
