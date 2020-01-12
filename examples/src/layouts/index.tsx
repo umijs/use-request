@@ -35,6 +35,15 @@ const BasicLayout: React.FC = (props) => {
     name: '节流',
     path: '/throttle'
   }, {
+    name: 'request1',
+    path: '/request1'
+  }, {
+    name: 'request2',
+    path: '/request2'
+  }, {
+    name: 'axios request',
+    path: '/axiosRequest'
+  }, {
     name: '分页',
     path: '/pagination'
   }, {

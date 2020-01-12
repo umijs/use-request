@@ -11,6 +11,7 @@
   "dependencies": {
     "@umijs/use-api": "^0.2.0",
     "antd": "^3.19.5",
+    "axios": "^0.19.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "umi-request": "^1.2.15"

@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "lodash.debounce": "^4.0.8",
-    "lodash.throttle": "^4.1.1"
+    "lodash.throttle": "^4.1.1",
+    "umi-request": "^1.2.17"
   }
 }

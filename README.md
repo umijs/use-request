@@ -59,7 +59,7 @@ export default () => {
 在这个例子中， useAPI 接收了一个异步函数 `getUserInfo` ，在组件初次加载时，自动触发该函数执行。同时 useAPI 会自动管理异步请求的 `loading` , `data` , `error` 等状态。
 
 ## 文档
-* 示例
+* 基础示例
   * [默认请求](#默认请求)
   * [手动触发](#手动触发)
   * [突变](#突变)
@@ -69,13 +69,12 @@ export default () => {
   * [缓存 & SWR](#缓存--swr)
   * [并行请求](#并行请求)
   * [Loading Delay](#loading-delay)
-  * 高级用法
-    * [分页](分页)
-    * [加载更多](加载更多)
-* [API](#api)
-* [高级 API](#高级-API)
-  * [分页 API](#分页-API)
-  * [加载更多 API](#加载更多-API)
+  * [refreshDeps](#refreshDeps)
+* [基础 API](#基础-API)
+* [扩展用法](#扩展用法)
+  * [集成请求库](#集成请求库)
+  * [分页](#分页)
+  * [加载更多](#加载更多)
 
 
 #### 默认请求
@@ -233,7 +232,7 @@ const withLoadingDelayAction = useAPI(getCurrentTime, {
 const [userId, setUserId] = useState('1');
 const { data, run, loading } = useAPI(getUserSchool, { manual: true });
 useEffect(() => {
-  run(userId);
+  run();
 }, [userId]);
 ```
 
@@ -242,91 +241,13 @@ useEffect(() => {
 ```jsx
 const [userId, setUserId] = useState('1');
 const { data, run, loading } = useAPI(() => {
-  return getUserSchool(userId)
+  return getUserSchool()
 }, {
   refreshDeps: [userId]
 });
 ```
 
-### 高级用法
-
-#### 分页
-
-通过设置 `options.paginated = true` ， useAPI 将以分页模式运行，此时会有以下特性：
-
-- useAPI 会自动管理分页 `current` , `pageSize` 。service 的第一个参数为 `{current, pageSize}` 。
-- service 返回的数据结构必须为 `{list: Item[], total: number}` ，如果不满足，可以通过 `options.formatResult` 转换一次。
-- 会额外返回 `pagination` 字段，包含所有分页信息，及操作分页的函数。
-- `refreshDeps` 变化，会重置 `current` 到第一页，并重新发起请求，一般你可以把 pagination 依赖的条件放这里。
-- 更多信息可查看 [API](#分页-1)。
-
-
-##### 示例 1
-
-[代码示例](./examples/src/pages/pagination/index.tsx)
-
-普通的分页场景，我们会自动管理 `current` 和 `pageSize` 
-
-```jsx
-const { data, loading, pagination } = useAPI(
-  ({ current, pageSize }) => getUserList({ current, pageSize }),
-  {
-    paginated: true,
-  }
-);
-```
-
-##### 示例 2
-
-[代码示例](./examples/src/pages/pagination1/index.tsx)
-
-由于 antd [Table](https://ant.design/components/table-cn/) 使用比较广泛，我们特别支持了 antd Table 需要的分页格式，及 `sorter` 、 `filters` 等。你可以通过 `result.tableProps` ， `result.filters` ， `result.sorter` 访问到这些属性。 
-
-```jsx
-const { tableProps, sorter, filters } = useAPI((params) => {
-  return getUserList(params);
-}, {
-  paginated: true
-});
-
-return (<Table columns={columns} rowKey="id" {...tableProps} />);
-```
-
-##### 示例 3
-
-[代码示例](./examples/src/pages/pagination2/index.tsx)
-
-在 `cacheKey` 场景下， `run` 的参数 `params` 是可以缓存的，利用这个特点，我们可以实现 pagination 相关条件的缓存。
-
-一个复杂的带条件，带缓存的 pagination 例子。
-
-![5](https://user-images.githubusercontent.com/12526493/71711583-a5a21600-2e3c-11ea-9a03-b57b20d536db.gif)
-
-
-#### 加载更多
-
-[代码示例](./examples/src/pages/loadMore/index.tsx)
-
-通过设置 `options.loadMore = true` ， useAPI 将以 loadMore 模式运行，此时会有以下特性：
-
-- service 返回的数据结构必须包含 `{list: Item[], nextId: string|undefined}` ，如果不满足，可以通过 `options.formatResult` 转换一次。
-- useAPI 会自动管理列表数据 。service 的第一个参数为 `nextId`。
-- 会额外返回 `result.loadingMore` 和 `result.loadMore` 。
-- `refreshDeps` 变化，会清空当前数据，并重新发起请求，一般你可以把 loadMore 依赖的条件放这里。
-- 更多信息可查看 [API](#加载更多)。
-
-```jsx
-const { data, run, loadMore, loading, loadingMore } = useAPI((nextId) => {
-  return getUserList(nextId);
-}, {
-  loadMore: true
-});
-```
-
-![6](https://user-images.githubusercontent.com/12526493/71711620-ca968900-2e3c-11ea-8e73-e93f535cc271.gif)
-
-
-### API
+### 基础 API
 
 ```javascript
 const {
@@ -475,11 +396,114 @@ const {
 
   - 节流间隔, 单位为毫秒，设置后，请求进入节流模式。
 
-### 高级 API
+### 扩展用法
 
-基于基础的 useAPI，我们可以进一步封装，实现多种定制需求。当前 useAPI 内置了 `分页` 和 `加载更多` 两种场景。你可以参考代码，实现自己的封装。参考 [usePaginated](./src/usePaginated.ts)、[useLoadMore](./src/useLoadMore.ts) 的实现。
+基于基础的 useAPI，我们可以进一步封装，实现更高级的定制需求。当前 useAPI 内置了 `集成请求库`，`分页` 和 `加载更多` 三种场景。你可以参考代码，实现自己的封装。参考 [useRequest](./src/useRequest.ts)、[usePaginated](./src/usePaginated.ts)、[useLoadMore](./src/useLoadMore.ts) 的实现。
 
-#### 分页 API
+#### 集成请求库
+
+如果 service 是 `string` 、 `object` 、 `(...args)=> string|object`, 我们会自动使用 [um-request](https://github.com/umijs/umi-request/blob/master/README_zh-CN.md) 来发送网络请求。umi-request 是类似 axios、fetch 的请求库。
+
+[代码示例1](./examples/src/pages/request1.tsx) [代码示例2](./examples/src/pages/request2.tsx)
+
+```javascript
+// 用法 1
+const { data, error, loading } = useAPI('/api/userInfo');
+
+// 用法 2
+const { data, error, loading } = useAPI({
+  url: '/api/changeUsername',
+  method: 'post',
+});
+
+// 用法 3
+const { data, error, loading } = useAPI((userId)=> `/api/userInfo/${userId}`);
+
+// 用法4
+const { loading, run } = useAPI((username) => ({
+  url: '/api/changeUsername',
+  method: 'post',
+  data: { username },
+}), {
+  manual: true,
+});
+```
+
+Q：<b>如果我要使用 `axios`、`fetch` 咋办？如何设置 `umi-request` 的全局配置？</b>
+A：你可以通过设置 `requestMehod` 即可。参考 [示例代码](./examples/src/pages/axiosRequest.tsx)
+
+##### API
+
+```typescript
+const {...} = useAPI<R>(
+  service: string | object | ((...args:any) => string | object), 
+  {
+    ...,
+    requestMehod?: (service) => Promise
+  })
+```
+##### service
+
+如果 service 是 `string` 、 `object` 、 `(...args)=> string|object`，则自动使用 `umi-request` 来发送请求。
+
+##### 参数
+
+- `requestMehod：(service: string|object)) => Promise` 
+
+  - 异步请求方法，参数为 service 或 service 返回的参数。如果设置该参数，则默认使用该函数发送网络请求。
+
+
+#### 分页
+
+通过设置 `options.paginated = true` ， useAPI 将以分页模式运行，此时会有以下特性：
+
+- useAPI 会自动管理分页 `current` , `pageSize` 。service 的第一个参数为 `{current, pageSize}` 。
+- service 返回的数据结构必须为 `{list: Item[], total: number}` ，如果不满足，可以通过 `options.formatResult` 转换一次。
+- 会额外返回 `pagination` 字段，包含所有分页信息，及操作分页的函数。
+- `refreshDeps` 变化，会重置 `current` 到第一页，并重新发起请求，一般你可以把 pagination 依赖的条件放这里。
+
+##### 示例 1
+
+[代码示例](./examples/src/pages/pagination/index.tsx)
+
+普通的分页场景，我们会自动管理 `current` 和 `pageSize` 
+
+```jsx
+const { data, loading, pagination } = useAPI(
+  ({ current, pageSize }) => getUserList({ current, pageSize }),
+  {
+    paginated: true,
+  }
+);
+```
+
+##### 示例 2
+
+[代码示例](./examples/src/pages/pagination1/index.tsx)
+
+由于 antd [Table](https://ant.design/components/table-cn/) 使用比较广泛，我们特别支持了 antd Table 需要的分页格式，及 `sorter` 、 `filters` 等。你可以通过 `result.tableProps` ， `result.filters` ， `result.sorter` 访问到这些属性。 
+
+```jsx
+const { tableProps, sorter, filters } = useAPI((params) => {
+  return getUserList(params);
+}, {
+  paginated: true
+});
+
+return (<Table columns={columns} rowKey="id" {...tableProps} />);
+```
+
+##### 示例 3
+
+[代码示例](./examples/src/pages/pagination2/index.tsx)
+
+在 `cacheKey` 场景下， `run` 的参数 `params` 是可以缓存的，利用这个特点，我们可以实现 pagination 相关条件的缓存。
+
+一个复杂的带条件，带缓存的 pagination 例子。
+
+![5](https://user-images.githubusercontent.com/12526493/71711583-a5a21600-2e3c-11ea-9a03-b57b20d536db.gif)
+
+##### API
 
 ```javascript
 const {
@@ -548,7 +572,28 @@ const {
 
   - 分页模式下， `refreshDeps` 变化，会重置 `current` 到第一页，并重新发起请求，一般你可以把依赖的条件放这里。
 
-#### 加载更多 API
+#### 加载更多
+
+[代码示例](./examples/src/pages/loadMore/index.tsx)
+
+通过设置 `options.loadMore = true` ， useAPI 将以 loadMore 模式运行，此时会有以下特性：
+
+- service 返回的数据结构必须包含 `{list: Item[], nextId: string|undefined}` ，如果不满足，可以通过 `options.formatResult` 转换一次。
+- useAPI 会自动管理列表数据 。service 的第一个参数为 `nextId`。
+- 会额外返回 `result.loadingMore` 和 `result.loadMore` 。
+- `refreshDeps` 变化，会清空当前数据，并重新发起请求，一般你可以把 loadMore 依赖的条件放这里。
+
+```jsx
+const { data, run, loadMore, loading, loadingMore } = useAPI((nextId) => {
+  return getUserList(nextId);
+}, {
+  loadMore: true
+});
+```
+
+![6](https://user-images.githubusercontent.com/12526493/71711620-ca968900-2e3c-11ea-8e73-e93f535cc271.gif)
+
+##### API
 
 ```javascript
 const {

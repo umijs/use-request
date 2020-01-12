@@ -8,6 +8,9 @@ export type Service<R, P extends any[]> = (...args: P) => Promise<R>;
 export type Subscribe<R, P extends any[]> = (data: FetchResult<R, P>) => void;
 export type Mutate<R> = (x: (data: R) => R) => void | ((data: R) => void);
 
+export type RequestService = string | { [key: string]: any };
+export type CombineService<R, P extends any[]> = RequestService | ((...args: P) => RequestService) | Service<R, P>;
+
 export interface Fetches<R, P extends any[]> {
   [key: string]: FetchResult<R, P>
 }
@@ -77,6 +80,8 @@ export type BaseOptions<R, P extends any[]> = {
   throttleInterval?: number;
 
   initialData?: R;
+
+  requestMehod?: (service: any) => Promise<R>
 }
 
 export type OptionsWithFormat<R, P extends any[], U, UU extends U> = {
@@ -85,6 +90,7 @@ export type OptionsWithFormat<R, P extends any[], U, UU extends U> = {
 
 export type Options<R, P extends any[], U, UU extends U> = BaseOptions<R, P> | OptionsWithFormat<R, P, U, UU>;
 
+/* ✅ --------------------------useRequest---------------------------- */
 
 /* ✅ --------------------------usePaginated---------------------------- */
 
