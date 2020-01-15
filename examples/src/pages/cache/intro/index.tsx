@@ -1,11 +1,11 @@
 import { getIntro } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { Spin } from 'antd';
 import React from 'react';
 
 
 export default () => {
-  const { data, loading } = useAPI(getIntro, {
+  const { data, loading } = useRequest(getIntro, {
     cacheKey: 'intro'
   });
 

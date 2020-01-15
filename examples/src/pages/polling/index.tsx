@@ -1,10 +1,10 @@
 import { getRandom } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import React from 'react';
 
 
 export default () => {
-  const { data, loading, cancel, run } = useAPI(getRandom, {
+  const { data, loading, cancel, run } = useRequest(getRandom, {
     pollingInterval: 1000,
     pollingWhenHidden: false
   });

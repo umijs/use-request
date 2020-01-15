@@ -1,4 +1,4 @@
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import React from 'react';
 
 interface User {
@@ -7,7 +7,7 @@ interface User {
 }
 
 export default () => {
-  const { data, error, loading } = useAPI<User>('/api/userInfo')
+  const { data, error, loading } = useRequest<User>('/api/userInfo')
 
   if (error) return <div>failed to load</div>
   if (loading) return <div>loading...</div>

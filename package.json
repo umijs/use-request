@@ -1,5 +1,5 @@
 {
-  "name": "@umijs/use-api",
+  "name": "@umijs/use-request",
   "version": "0.3.0",
   "description": "React Hooks for fetching, caching and updating asynchronous data",
   "main": "./lib/index.js",
@@ -20,7 +20,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/umijs/use-api.git"
+    "url": "git+https://github.com/umijs/use-request.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.com/"
@@ -28,9 +28,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/umijs/use-api/issues"
+    "url": "https://github.com/umijs/use-request/issues"
   },
-  "homepage": "https://github.com/umijs/use-api#readme",
+  "homepage": "https://github.com/umijs/use-request#readme",
   "peerDependencies": {
     "react": "^16.8.6"
   },

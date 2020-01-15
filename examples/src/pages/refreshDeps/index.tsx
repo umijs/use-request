@@ -1,5 +1,5 @@
 import { getUserSchool } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { Spin } from 'antd';
 import React, { useState, useEffect } from 'react';
 
@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 export default () => {
 
   const [userId, setUserId] = useState('1');
-  const { data, run, loading } = useAPI(() => {
+  const { data, run, loading } = useRequest(() => {
     return getUserSchool(userId)
   }, {
     refreshDeps: [userId]

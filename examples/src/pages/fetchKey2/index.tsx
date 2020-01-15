@@ -1,4 +1,4 @@
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { Button, Spin } from 'antd';
 import React from 'react';
 
@@ -13,7 +13,7 @@ const getArtitle = async (type: string): Promise<string> => {
 
 export default () => {
 
-  const { run, fetches } = useAPI(getArtitle, {
+  const { run, fetches } = useRequest(getArtitle, {
     manual: true,
     fetchKey: (type) => type,
   });

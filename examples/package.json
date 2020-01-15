@@ -9,7 +9,7 @@
     "precommit": "lint-staged"
   },
   "dependencies": {
-    "@umijs/use-api": "^0.2.0",
+    "@umijs/use-request": "^0.2.0",
     "antd": "^3.19.5",
     "axios": "^0.19.1",
     "react": "^16.8.6",

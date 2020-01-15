@@ -1,10 +1,10 @@
 import { getUserList } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { Button, Table } from 'antd';
 import React from 'react';
 
 export default () => {
-  const { tableProps, filters, sorter, refresh } = useAPI(({ current, pageSize, sorter, filters }) => {
+  const { tableProps, filters, sorter, refresh } = useRequest(({ current, pageSize, sorter, filters }) => {
     const params: any = { current, pageSize };
     if (sorter?.field && sorter?.order) {
       params[sorter.field] = sorter.order;

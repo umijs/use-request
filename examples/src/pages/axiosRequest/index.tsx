@@ -1,11 +1,11 @@
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import React, { useState } from 'react';
 import axios from 'axios';
 
 type Response = { success: boolean }
 export default () => {
   const [state, setState] = useState('');
-  const { loading, run } = useAPI<Response>((username: string) => ({
+  const { loading, run } = useRequest<Response>((username: string) => ({
     url: '/api/changeUsername',
     method: 'post',
     data: { username },

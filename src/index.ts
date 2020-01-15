@@ -6,33 +6,33 @@ import useLoadMore from './useLoadMore';
 import usePaginated from './usePaginated';
 import ConfigContext from './configContext';
 
-function useAPI<R = any, P extends any[] = any, U = any, UU extends U = any>(
+function useRequest<R = any, P extends any[] = any, U = any, UU extends U = any>(
   service: CombineService<R, P>,
   options: OptionsWithFormat<R, P, U, UU>
 ): BaseResult<U, P>
-function useAPI<R = any, P extends any[] = any>(
+function useRequest<R = any, P extends any[] = any>(
   service: CombineService<R, P>,
   options?: BaseOptions<R, P>
 ): BaseResult<R, P>
-function useAPI<R = any, Item = any, U extends Item = any>(
+function useRequest<R = any, Item = any, U extends Item = any>(
   service: CombineService<R, LoadMoreParams>,
   options: LoadMoreOptionsWithFormat<R, Item, U>
 ): LoadMoreResult<Item>
-function useAPI<R = any, Item = any, U extends Item = any>(
+function useRequest<R = any, Item = any, U extends Item = any>(
   service: CombineService<LoadMoreFormatReturn<Item>, LoadMoreParams>,
   options: LoadMoreOptions<U>
 ): LoadMoreResult<Item>
 
-function useAPI<R = any, Item = any, U extends Item = any>(
+function useRequest<R = any, Item = any, U extends Item = any>(
   service: CombineService<R, PaginatedParams<U>>,
   options: PaginatedOptionsWithFormat<R, Item, U>
 ): PaginatedResult<Item>
-function useAPI<R = any, Item = any, U extends Item = any>(
+function useRequest<R = any, Item = any, U extends Item = any>(
   service: CombineService<PaginatedFormatReturn<Item>, PaginatedParams<U>>,
   options: BasePaginatedOptions<U>
 ): PaginatedResult<Item>
 
-function useAPI(service: any, options: any = {}) {
+function useRequest(service: any, options: any = {}) {
 
   const contextConfig = useContext(ConfigContext);
   const finalOptions = { ...contextConfig, ...options };
@@ -100,4 +100,4 @@ export {
   UseAPIProvider
 };
 
-export default useAPI;
+export default useRequest;

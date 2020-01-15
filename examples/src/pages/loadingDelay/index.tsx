@@ -1,4 +1,4 @@
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { Button, Spin } from 'antd';
 import React from 'react';
 
@@ -12,9 +12,9 @@ const getCurrentTime = () => {
 
 export default () => {
 
-  const getTimeAction = useAPI(getCurrentTime);
+  const getTimeAction = useRequest(getCurrentTime);
 
-  const withLoadingDelayAction = useAPI(getCurrentTime, {
+  const withLoadingDelayAction = useRequest(getCurrentTime, {
     loadingDelay: 200
   });
 

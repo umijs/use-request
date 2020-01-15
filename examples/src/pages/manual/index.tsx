@@ -1,11 +1,11 @@
 import { changeUsername } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import React, { useState } from 'react';
 
 
 export default () => {
   const [state, setState] = useState('');
-  const { loading, run } = useAPI(changeUsername, {
+  const { loading, run } = useRequest(changeUsername, {
     manual: true,
     onSuccess: (_, params) => {
       setState('');

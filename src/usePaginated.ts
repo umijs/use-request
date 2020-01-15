@@ -30,7 +30,7 @@ function usePaginated<R, Item, U extends Item = any>(
 
   useEffect(() => {
     if (fetchKey) {
-      console.warn(`useAPI pagination's fetchKey will not work!`);
+      console.warn(`useRequest pagination's fetchKey will not work!`);
     }
   }, []);
 

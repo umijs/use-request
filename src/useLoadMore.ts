@@ -24,7 +24,7 @@ function useLoadMore<R, Item, U extends Item = any>(
 
   useEffect(() => {
     if (fetchKey) {
-      console.warn(`useAPI loadMore's fetchKey will not work!`);
+      console.warn(`useRequest loadMore's fetchKey will not work!`);
     }
   }, []);
 

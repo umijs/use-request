@@ -1,9 +1,9 @@
 import { getUserInfo } from '@/service';
 import React from 'react';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 
 export default () => {
-  const { data, error, loading } = useAPI(getUserInfo)
+  const { data, error, loading } = useRequest(getUserInfo)
 
   if (error) return <div>failed to load</div>
   if (loading) return <div>loading...</div>

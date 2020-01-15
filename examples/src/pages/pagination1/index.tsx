@@ -1,5 +1,5 @@
 import { getUserList } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { List, Pagination, Select } from 'antd';
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'umi/link';
@@ -8,7 +8,7 @@ export default () => {
 
   const firstRun = useRef(true);
 
-  const { params, run, data, loading, pagination } = useAPI(
+  const { params, run, data, loading, pagination } = useRequest(
     (p, gender?: string) => getUserList({ ...p, gender }),
     {
       cacheKey: 'paginationDemo',

@@ -1,4 +1,4 @@
-# useAPI
+# useRequest
 
 Production-ready React Hooks library for manage asynchronous data.
 
@@ -31,24 +31,24 @@ Production-ready React Hooks library for manage asynchronous data.
 ### 安装
 
 ```shell
-$ npm i @umijs/use-api --save
+$ npm i @umijs/use-request --save
 # or 
-$ yarn add @umijs/use-api
+$ yarn add @umijs/use-request
 ```
 
 ### 使用
 
 ```javascript
 //service 为异步函数。
-const {data, error, loading} = useAPI(service);
+const {data, error, loading} = useRequest(service);
 ```
 
 ```jsx
 import React from 'react';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 
 export default () => {
-  const { data, error, loading } = useAPI(getUserInfo)
+  const { data, error, loading } = useRequest(getUserInfo)
 
   if (error) return <div>failed to load</div>
   if (loading) return <div>loading...</div>
@@ -56,7 +56,7 @@ export default () => {
 }
 ```
 
-在这个例子中， useAPI 接收了一个异步函数 `getUserInfo` ，在组件初次加载时，自动触发该函数执行。同时 useAPI 会自动管理异步请求的 `loading` , `data` , `error` 等状态。
+在这个例子中， useRequest 接收了一个异步函数 `getUserInfo` ，在组件初次加载时，自动触发该函数执行。同时 useRequest 会自动管理异步请求的 `loading` , `data` , `error` 等状态。
 
 ## 文档
 * 基础示例
@@ -82,7 +82,7 @@ export default () => {
 
 [代码示例](./examples/src/pages/index.tsx)
 
-如 [快速开始](#使用) 例子一样， useAPI 在组件初始化时会默认执行 service。
+如 [快速开始](#使用) 例子一样， useRequest 在组件初始化时会默认执行 service。
 
 #### 手动触发
 
@@ -91,7 +91,7 @@ export default () => {
 通过设置 `options.manual = true` , 则需要手动调用 `run` 时才会触发执行。
 
 ```jsx
-const { loading, run } = useAPI(changeUsername, {
+const { loading, run } = useRequest(changeUsername, {
   manual: true,
 });
 
@@ -107,7 +107,7 @@ const { loading, run } = useAPI(changeUsername, {
 你可以通过 `mutate` ，直接修改 `data` 。 `mutate` 函数参数可以为 `newData` 或 `(data)=> newData` 。
 
 ```jsx
-const { data, mutate } = useAPI(getUserInfo);
+const { data, mutate } = useRequest(getUserInfo);
 
 <button onClick={() => mutate('new name')}>
     Edit
@@ -124,7 +124,7 @@ const { data, mutate } = useAPI(getUserInfo);
 - 在 `manual=true` 时，需要第一次执行 `run` 后，才开始轮询。
 
 ```jsx
-const { data, loading } = useAPI(getUserInfo, {
+const { data, loading } = useRequest(getUserInfo, {
   pollingInterval: 1000,
   pollingWhenHidden: false
 });
@@ -137,7 +137,7 @@ const { data, loading } = useAPI(getUserInfo, {
 通过设置 `debounceInterval` ，则进入防抖模式。此时如果频繁触发 `run` ，则会以防抖策略进行请求。
 
 ```jsx
-const { data, loading, run } = useAPI(getUserInfo, {
+const { data, loading, run } = useRequest(getUserInfo, {
   debounceInterval: 500
 });
 ```
@@ -149,7 +149,7 @@ const { data, loading, run } = useAPI(getUserInfo, {
 通过设置 `throttleInterval` ，则进入节流模式。此时如果频繁触发 `run` ，则会以节流策略进行请求。
 
 ```jsx
-const { data, loading, run } = useAPI(getUserInfo, {
+const { data, loading, run } = useRequest(getUserInfo, {
   throttleInterval: 500
 });
 ```
@@ -158,10 +158,10 @@ const { data, loading, run } = useAPI(getUserInfo, {
 
 [代码示例](./examples/src/pages/cache/index.tsx)
 
-如果设置了 `cacheKey` ， useAPI 会将当前请求结束数据缓存起来。下次组件初始化时，如果有缓存数据，我们会优先返回缓存数据，然后在背后发送新请求，也就是 SWR 的能力。
+如果设置了 `cacheKey` ， useRequest 会将当前请求结束数据缓存起来。下次组件初始化时，如果有缓存数据，我们会优先返回缓存数据，然后在背后发送新请求，也就是 SWR 的能力。
 
 ```jsx
-const { data, loading, run } = useAPI(getInfo, {
+const { data, loading, run } = useRequest(getInfo, {
   cachekey: 'getInfoKey'
 });
 ```
@@ -184,7 +184,7 @@ const { data, loading, run } = useAPI(getInfo, {
 你可以通过设置 `focusTimespan` 来设置请求间隔，默认为 `5000ms` 。
 
 ```jsx
-const { data, loading } = useAPI(getUserInfo, {
+const { data, loading } = useRequest(getUserInfo, {
   refreshOnWindowFocus: true,
   focusTimespan: 5000
 });
@@ -198,7 +198,7 @@ const { data, loading } = useAPI(getUserInfo, {
 通过 `fetchKey` ，可以将请求进行分类，每一类的请求都有独立的状态，你可以在 `fetches` 中找到所有的请求。
 
 ```jsx
-const { run, fetches } = useAPI(disableUser, {
+const { run, fetches } = useRequest(disableUser, {
   manual: true,
   fetchKey: (id) => id,
 });
@@ -216,7 +216,7 @@ const { run, fetches } = useAPI(disableUser, {
 通过设置 `loadingDelay` ，可以延迟 `loading` 变成 `true` 的时间，有效防止请求抖动。
 
 ```jsx
-const withLoadingDelayAction = useAPI(getCurrentTime, {
+const withLoadingDelayAction = useRequest(getCurrentTime, {
     loadingDelay: 200
 });
 ```
@@ -231,7 +231,7 @@ const withLoadingDelayAction = useAPI(getCurrentTime, {
 
 ```jsx
 const [userId, setUserId] = useState('1');
-const { data, run, loading } = useAPI(getUserSchool, { manual: true });
+const { data, run, loading } = useRequest(getUserSchool, { manual: true });
 useEffect(() => {
   run();
 }, [userId]);
@@ -241,7 +241,7 @@ useEffect(() => {
 
 ```jsx
 const [userId, setUserId] = useState('1');
-const { data, run, loading } = useAPI(() => {
+const { data, run, loading } = useRequest(() => {
   return getUserSchool()
 }, {
   refreshDeps: [userId]
@@ -261,7 +261,7 @@ const {
   refresh,
   mutate,
   fetches,
-} = useAPI(service, {
+} = useRequest(service, {
   manual,
   initialData,
   refreshDeps,
@@ -399,7 +399,7 @@ const {
 
 ### 扩展用法
 
-基于基础的 useAPI，我们可以进一步封装，实现更高级的定制需求。当前 useAPI 内置了 `集成请求库`，`分页` 和 `加载更多` 三种场景。你可以参考代码，实现自己的封装。参考 [useRequest](./src/useRequest.ts)、[usePaginated](./src/usePaginated.ts)、[useLoadMore](./src/useLoadMore.ts) 的实现。
+基于基础的 useRequest，我们可以进一步封装，实现更高级的定制需求。当前 useRequest 内置了 `集成请求库`，`分页` 和 `加载更多` 三种场景。你可以参考代码，实现自己的封装。参考 [useRequest](./src/useRequest.ts)、[usePaginated](./src/usePaginated.ts)、[useLoadMore](./src/useLoadMore.ts) 的实现。
 
 #### 集成请求库
 
@@ -409,19 +409,19 @@ const {
 
 ```javascript
 // 用法 1
-const { data, error, loading } = useAPI('/api/userInfo');
+const { data, error, loading } = useRequest('/api/userInfo');
 
 // 用法 2
-const { data, error, loading } = useAPI({
+const { data, error, loading } = useRequest({
   url: '/api/changeUsername',
   method: 'post',
 });
 
 // 用法 3
-const { data, error, loading } = useAPI((userId)=> `/api/userInfo/${userId}`);
+const { data, error, loading } = useRequest((userId)=> `/api/userInfo/${userId}`);
 
 // 用法4
-const { loading, run } = useAPI((username) => ({
+const { loading, run } = useRequest((username) => ({
   url: '/api/changeUsername',
   method: 'post',
   data: { username },
@@ -436,7 +436,7 @@ A：你可以通过设置 `requestMehod` 即可。参考 [示例代码](./exampl
 ##### API
 
 ```typescript
-const {...} = useAPI<R>(
+const {...} = useRequest<R>(
   service: string | object | ((...args:any) => string | object), 
   {
     ...,
@@ -456,9 +456,9 @@ const {...} = useAPI<R>(
 
 #### 分页
 
-通过设置 `options.paginated = true` ， useAPI 将以分页模式运行，此时会有以下特性：
+通过设置 `options.paginated = true` ， useRequest 将以分页模式运行，此时会有以下特性：
 
-- useAPI 会自动管理分页 `current` , `pageSize` 。service 的第一个参数为 `{current, pageSize}` 。
+- useRequest 会自动管理分页 `current` , `pageSize` 。service 的第一个参数为 `{current, pageSize}` 。
 - service 返回的数据结构必须为 `{list: Item[], total: number}` ，如果不满足，可以通过 `options.formatResult` 转换一次。
 - 会额外返回 `pagination` 字段，包含所有分页信息，及操作分页的函数。
 - `refreshDeps` 变化，会重置 `current` 到第一页，并重新发起请求，一般你可以把 pagination 依赖的条件放这里。
@@ -470,7 +470,7 @@ const {...} = useAPI<R>(
 普通的分页场景，我们会自动管理 `current` 和 `pageSize` 
 
 ```jsx
-const { data, loading, pagination } = useAPI(
+const { data, loading, pagination } = useRequest(
   ({ current, pageSize }) => getUserList({ current, pageSize }),
   {
     paginated: true,
@@ -485,7 +485,7 @@ const { data, loading, pagination } = useAPI(
 由于 antd [Table](https://ant.design/components/table-cn/) 使用比较广泛，我们特别支持了 antd Table 需要的分页格式，及 `sorter` 、 `filters` 等。你可以通过 `result.tableProps` ， `result.filters` ， `result.sorter` 访问到这些属性。 
 
 ```jsx
-const { tableProps, sorter, filters } = useAPI((params) => {
+const { tableProps, sorter, filters } = useRequest((params) => {
   return getUserList(params);
 }, {
   paginated: true
@@ -535,7 +535,7 @@ const {
 
   sorter?: SorterResult<Item>;
   filters?: Record<keyof Item, string[]>;
-} = useAPI(service, {
+} = useRequest(service, {
   ...,
   paginated,
   defaultPageSize,
@@ -577,15 +577,15 @@ const {
 
 [代码示例](./examples/src/pages/loadMore/index.tsx)
 
-通过设置 `options.loadMore = true` ， useAPI 将以 loadMore 模式运行，此时会有以下特性：
+通过设置 `options.loadMore = true` ， useRequest 将以 loadMore 模式运行，此时会有以下特性：
 
 - service 返回的数据结构必须包含 `{list: Item[], nextId: string|undefined}` ，如果不满足，可以通过 `options.formatResult` 转换一次。
-- useAPI 会自动管理列表数据 。service 的第一个参数为 `nextId`。
+- useRequest 会自动管理列表数据 。service 的第一个参数为 `nextId`。
 - 会额外返回 `result.loadingMore` 和 `result.loadMore` 。
 - `refreshDeps` 变化，会清空当前数据，并重新发起请求，一般你可以把 loadMore 依赖的条件放这里。
 
 ```jsx
-const { data, run, loadMore, loading, loadingMore } = useAPI((nextId) => {
+const { data, run, loadMore, loading, loadingMore } = useRequest((nextId) => {
   return getUserList(nextId);
 }, {
   loadMore: true
@@ -601,7 +601,7 @@ const {
   ...,
   loadMore,
   loadingMore,
-} = useAPI(service, {
+} = useRequest(service, {
   ...,
   loadMore,
   refreshDeps,
@@ -636,7 +636,7 @@ const {
 你可以通过 `UseAPIProvider` 在项目的最外层设置全局 options。
 
 ```tsx
-import {UseAPIProvider} from '@umijs/use-api';
+import {UseAPIProvider} from '@umijs/use-request';
 
 export function ({children})=>{
   return (
@@ -657,9 +657,9 @@ export function ({children})=>{
 
 ## License
 
-[MIT](https://github.com/umijs/use-api/blob/master/LICENSE)
+[MIT](https://github.com/umijs/use-request/blob/master/LICENSE)
 
-[1]:	https://www.npmjs.com/package/@umijs/use-api
-[2]:	https://npmjs.org/package/@umijs/use-api
-[image-1]:	https://img.shields.io/npm/v/@umijs/use-api.svg?style=flat
-[image-2]:	https://img.shields.io/npm/dm/@umijs/use-api.svg?style=flat
+[1]:	https://www.npmjs.com/package/@umijs/use-request
+[2]:	https://npmjs.org/package/@umijs/use-request
+[image-1]:	https://img.shields.io/npm/v/@umijs/use-request.svg?style=flat
+[image-2]:	https://img.shields.io/npm/dm/@umijs/use-request.svg?style=flat

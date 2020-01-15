@@ -1,4 +1,4 @@
-# useAPI Example
+# useRequest Example
 
 ```
 npm install

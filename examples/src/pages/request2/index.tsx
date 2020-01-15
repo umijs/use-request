@@ -1,10 +1,10 @@
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import React, { useState } from 'react';
 
 
 export default () => {
   const [state, setState] = useState('');
-  const { loading, run } = useAPI((username) => ({
+  const { loading, run } = useRequest((username) => ({
     url: '/api/changeUsername',
     method: 'post',
     data: { username },

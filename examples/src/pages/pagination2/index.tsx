@@ -1,10 +1,10 @@
 import { getUserList } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { List, Pagination } from 'antd';
 import React from 'react';
 
 export default () => {
-  const { data, loading, pagination } = useAPI(
+  const { data, loading, pagination } = useRequest(
     ({ current, pageSize }) => getUserList({ current, pageSize }),
     {
       paginated: true,

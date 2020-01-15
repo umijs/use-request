@@ -1,17 +1,17 @@
 import React from 'react';
 import Link from 'umi/link';
 import { getIntro, getArtitle } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 
 
 export default () => {
 
-  const getArticleAction = useAPI(getArtitle, {
+  const getArticleAction = useRequest(getArtitle, {
     manual: true,
     cacheKey: 'article'
   });
 
-  const getIntroAction = useAPI(getIntro, {
+  const getIntroAction = useRequest(getIntro, {
     manual: true,
     cacheKey: 'intro'
   });

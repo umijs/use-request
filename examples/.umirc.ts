@@ -18,7 +18,7 @@ const config: IConfig =  {
       antd: true,
       dva: false,
       dynamicImport: false,
-      title: 'useAPI',
+      title: 'useRequest',
       dll: false,
       
       routes: {

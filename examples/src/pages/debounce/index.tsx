@@ -1,12 +1,12 @@
 import { getEmail } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { Select } from 'antd';
 import React from 'react';
 
 const { Option } = Select;
 
 export default () => {
-  const { data, loading, run, cancel } = useAPI(getEmail, {
+  const { data, loading, run, cancel } = useRequest(getEmail, {
     debounceInterval: 500,
     manual: true
   });

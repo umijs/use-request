@@ -1,7 +1,7 @@
-import useAPI from '../index';
+import useRequest from '../index';
 
-describe('useAPI', () => {
+describe('useRequest', () => {
   it('should be defined', () => {
-    expect(useAPI).toBeDefined();
+    expect(useRequest).toBeDefined();
   });
 });

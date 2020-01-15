@@ -1,12 +1,12 @@
 import { disableUser } from '@/service';
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { Button, message } from 'antd';
 import React from 'react';
 
 export default () => {
 
 
-  const { run, fetches } = useAPI(disableUser, {
+  const { run, fetches } = useRequest(disableUser, {
     manual: true,
     fetchKey: (id) => id,
     onSuccess: (_, params) => {

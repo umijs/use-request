@@ -1,4 +1,4 @@
-import useAPI from '@umijs/use-api';
+import useRequest from '@umijs/use-request';
 import { Button, Spin } from 'antd';
 import React from 'react';
 import Link from 'umi/link';
@@ -33,7 +33,7 @@ function getList(nextId: any, limit: any): Promise<{ list: Item[], nextId: strin
 
 export default () => {
 
-  const { data, loading, loadMore, loadingMore } = useAPI((nextId) => {
+  const { data, loading, loadMore, loadingMore } = useRequest((nextId) => {
     return getList(nextId, 3);
   }, {
     cacheKey: 'loadMoreDemo',
