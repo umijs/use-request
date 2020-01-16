@@ -1,6 +1,6 @@
 {
   "name": "@umijs/use-request",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0",
   "description": "React Hooks for fetching, caching and updating asynchronous data",
   "main": "./lib/index.js",
   "module": "./es/index.js",
