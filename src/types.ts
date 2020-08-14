@@ -42,7 +42,8 @@ export interface FetchConfig<R, P extends any[]> {
 
   debounceInterval?: number;
   throttleInterval?: number;
-
+  
+  initialData?: R;
 }
 
 export interface BaseResult<R, P extends any[]> extends FetchResult<R, P> {
