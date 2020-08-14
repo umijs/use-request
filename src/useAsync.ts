@@ -135,7 +135,7 @@ class Fetch<R, P extends any[]> {
           clearTimeout(this.loadingDelayTimer);
         }
         this.setState({
-          data: undefined,
+          data: this.config.initialData || undefined,
           error,
           loading: false
         });
@@ -293,7 +293,8 @@ function useAsync<R, P extends any[], U, UU extends U = any>(
     refreshOnWindowFocus,
     focusTimespan,
     debounceInterval,
-    throttleInterval
+    throttleInterval,
+    initialData,
   }
 
 
